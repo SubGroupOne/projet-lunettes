@@ -1,6 +1,7 @@
 const express = require('express');
 const authRoutes = require('./routes/auth.routes');
-
+const frameRoutes = require('./routes/frame.routes');
+const orderRoutes = require('./routes/order.routes');
 
 const app = express();
 
@@ -11,7 +12,10 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('API backend opérationnelle 🚀');
 });
+
 app.use('/auth', authRoutes);
+app.use('/frames', frameRoutes);
+app.use('/orders', orderRoutes);
 
 
 module.exports = app;

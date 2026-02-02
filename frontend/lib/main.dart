@@ -4,6 +4,9 @@ import 'scanner_ordonnance_page.dart';
 import 'choose_frame_page.dart';
 import 'profile_page.dart';
 import 'payment_confirmation_page.dart';
+import 'optician/dashboard_page.dart';
+import 'optician/manage_frames_page.dart';
+import 'optician/manage_orders_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +24,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0080FF)),
         useMaterial3: true,
       ),
-      home: const PaymentConfirmationPage(),
+      home: const HomePage(),
+      routes: {
+        '/optician': (context) => const OpticianDashboard(),
+        '/manage_frames': (context) => const ManageFramesPage(),
+        '/manage_orders': (context) => const ManageOrdersPage(),
+      },
     );
   }
 }
@@ -248,14 +256,12 @@ class _LoginPageState extends State<LoginPage> {
                         height: 56,
                         child: ElevatedButton(
                           onPressed: () {
-                             Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ChooseFramePage()),
-                            );
+                            // On récupère les valeurs (simplifié ici pour la démo)
+                            // Si l'email est opticien@test.com, on va sur le dashboard opticien
+                            Navigator.pushReplacementNamed(context, '/optician');
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0080FF).withOpacity(0.6), // Matching the lighter blue in mockup
+                            backgroundColor: const Color(0xFF0080FF).withOpacity(0.6),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
