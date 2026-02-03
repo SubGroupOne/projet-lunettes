@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'virtual_try_on_page.dart';
-import 'scanner_ordonnance_page.dart';
-import 'choose_frame_page.dart';
-import 'profile_page.dart';
 import 'payment_confirmation_page.dart';
+import 'products_page.dart';
 import 'optician/dashboard_page.dart';
 import 'optician/manage_frames_page.dart';
 import 'optician/manage_orders_page.dart';
@@ -29,6 +26,8 @@ class MyApp extends StatelessWidget {
         '/optician': (context) => const OpticianDashboard(),
         '/manage_frames': (context) => const ManageFramesPage(),
         '/manage_orders': (context) => const ManageOrdersPage(),
+        '/products': (context) => const ProductsPage(),
+        '/payment': (context) => const PaymentConfirmationPage(),
       },
     );
   }
@@ -43,11 +42,7 @@ class HomePage extends StatelessWidget {
       body: Stack(
         children: [
           // Background with diagonal split
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DiagonalPainter(),
-            ),
-          ),
+          Positioned.fill(child: CustomPaint(painter: DiagonalPainter())),
           // Content
           SafeArea(
             child: Center(
@@ -71,10 +66,7 @@ class HomePage extends StatelessWidget {
                       child: Text(
                         'Essayez vos lunettes sans bouger de chez vous.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black87,
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.black87),
                       ),
                     ),
                     const Spacer(flex: 4),
@@ -85,7 +77,8 @@ class HomePage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
+                              builder: (context) => const LoginPage(),
+                            ),
                           );
                         },
                         child: const Text(
@@ -117,7 +110,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
   bool _obscureText = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +129,7 @@ class _LoginPageState extends State<LoginPage> {
           Positioned.fill(
             child: Opacity(
               opacity: 0.15, // Light overlay effect as per design
-              child: Image.asset(
-                'assets/glasses.png',
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset('assets/glasses.png', fit: BoxFit.contain),
             ),
           ),
           SafeArea(
@@ -157,13 +154,10 @@ class _LoginPageState extends State<LoginPage> {
                       const Text(
                         'Trouvez la paire parfaite, en quelques clics',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
                       ),
                       const SizedBox(height: 48),
-                      
+
                       // Email Field
                       const Align(
                         alignment: Alignment.centerLeft,
@@ -177,6 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 8),
                       TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'mail@gmail.com',
                           border: OutlineInputBorder(
@@ -229,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // Forgot Password
                       Align(
                         alignment: Alignment.centerRight,
@@ -238,8 +233,9 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ForgotPasswordPage()),
+                                builder: (context) =>
+                                    const ForgotPasswordPage(),
+                              ),
                             );
                           },
                           child: const Text(
@@ -258,10 +254,23 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             // On récupère les valeurs (simplifié ici pour la démo)
                             // Si l'email est opticien@test.com, on va sur le dashboard opticien
-                            Navigator.pushReplacementNamed(context, '/optician');
+                            final email = _emailController.text.trim();
+                            if (email.toLowerCase() == 'opticien@test.com') {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/optician',
+                              );
+                            } else {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/products',
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0080FF).withOpacity(0.6),
+                            backgroundColor: const Color(
+                              0xFF0080FF,
+                            ).withAlpha((0.6 * 255).round()),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -285,7 +294,8 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const RegisterPage()),
+                              builder: (context) => const RegisterPage(),
+                            ),
                           );
                         },
                         child: const Text(
@@ -466,7 +476,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0080FF).withOpacity(0.6),
+                        backgroundColor: const Color(
+                          0xFF0080FF,
+                        ).withAlpha((0.6 * 255).round()),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -529,10 +541,7 @@ class ForgotPasswordPage extends StatelessWidget {
                   const Text(
                     'Entrez votre email',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.black87),
                   ),
                   const SizedBox(height: 24),
                   TextField(
@@ -556,12 +565,14 @@ class ForgotPasswordPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const VerificationPage()),
+                            builder: (context) => const VerificationPage(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFF0080FF).withOpacity(0.6),
+                        backgroundColor: const Color(
+                          0xFF0080FF,
+                        ).withAlpha((0.6 * 255).round()),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -632,10 +643,7 @@ class _VerificationPageState extends State<VerificationPage> {
                   const Text(
                     'Entrez votre code de verification',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.black87),
                   ),
                   const SizedBox(height: 24),
                   TextField(
@@ -680,12 +688,14 @@ class _VerificationPageState extends State<VerificationPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const NewPasswordPage()),
+                            builder: (context) => const NewPasswordPage(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFF0080FF).withOpacity(0.6),
+                        backgroundColor: const Color(
+                          0xFF0080FF,
+                        ).withAlpha((0.6 * 255).round()),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -865,11 +875,14 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Action to save new password
-                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFF0080FF).withOpacity(0.6),
+                        backgroundColor: const Color(
+                          0xFF0080FF,
+                        ).withAlpha((0.6 * 255).round()),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

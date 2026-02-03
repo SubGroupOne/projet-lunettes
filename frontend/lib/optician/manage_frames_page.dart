@@ -9,9 +9,27 @@ class ManageFramesPage extends StatefulWidget {
 
 class _ManageFramesPageState extends State<ManageFramesPage> {
   final List<Map<String, dynamic>> _frames = [
-    {'name': 'Classic Ray', 'brand': 'RayBan', 'price': '120.00', 'stock': 15, 'imageUrl': 'assets/glasses.png'},
-    {'name': 'Blue Horizon', 'brand': 'Oakley', 'price': '150.00', 'stock': 8, 'imageUrl': 'assets/blue_sunglasses.png'},
-    {'name': 'Orange Sunset', 'brand': 'Gucci', 'price': '250.00', 'stock': 5, 'imageUrl': 'assets/orange_sunglasses.png'},
+    {
+      'name': 'Classic Ray',
+      'brand': 'RayBan',
+      'price': '120.00',
+      'stock': 15,
+      'imageUrl': 'assets/glasses.png',
+    },
+    {
+      'name': 'Blue Horizon',
+      'brand': 'Oakley',
+      'price': '150.00',
+      'stock': 8,
+      'imageUrl': 'assets/blue_sunglasses.png',
+    },
+    {
+      'name': 'Orange Sunset',
+      'brand': 'Gucci',
+      'price': '250.00',
+      'stock': 5,
+      'imageUrl': 'assets/orange_sunglasses.png',
+    },
   ];
 
   @override
@@ -43,7 +61,7 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withAlpha((0.03 * 255).round()),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -65,14 +83,36 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(frame['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(frame['brand'], style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                      Text(
+                        frame['name'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        frame['brand'],
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('${frame['price']} €', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('Stock: ${frame['stock']}', style: TextStyle(color: (frame['stock'] as int) < 10 ? Colors.red : Colors.green)),
+                          Text(
+                            '${frame['price']} €',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Text(
+                            'Stock: ${frame['stock']}',
+                            style: TextStyle(
+                              color: (frame['stock'] as int) < 10
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -108,16 +148,30 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const TextField(decoration: InputDecoration(labelText: 'Nom de la monture')),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Nom de la monture'),
+              ),
               const TextField(decoration: InputDecoration(labelText: 'Marque')),
-              const TextField(decoration: InputDecoration(labelText: 'Prix (€)'), keyboardType: TextInputType.number),
-              const TextField(decoration: InputDecoration(labelText: 'Stock'), keyboardType: TextInputType.number),
-              const TextField(decoration: InputDecoration(labelText: 'Description'), maxLines: 3),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Prix (€)'),
+                keyboardType: TextInputType.number,
+              ),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Stock'),
+                keyboardType: TextInputType.number,
+              ),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Description'),
+                maxLines: 3,
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.black),

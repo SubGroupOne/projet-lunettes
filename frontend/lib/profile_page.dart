@@ -45,7 +45,9 @@ class ProfilePage extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey.shade200, width: 1),
                       image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/300'), // Placeholder avatar
+                        image: NetworkImage(
+                          'https://i.pravatar.cc/300',
+                        ), // Placeholder avatar
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -77,10 +79,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const Text(
               'Alexandrebouda@gmail.com',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 32),
 
@@ -150,7 +149,10 @@ class ProfilePage extends StatelessWidget {
                       ),
                       child: const Text(
                         "Centre d'Aide",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -175,7 +177,11 @@ class ProfilePage extends StatelessWidget {
                           SizedBox(width: 12),
                           Text(
                             "Deconnexion",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                            ),
                           ),
                         ],
                       ),
@@ -214,19 +220,19 @@ class ProfilePage extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFFECF3F9), // Light blueish grey background from image
+        color: const Color(
+          0xFFECF3F9,
+        ), // Light blueish grey background from image
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        children: items,
-      ),
+      child: Column(children: items),
     );
   }
 
@@ -266,10 +272,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -317,10 +320,7 @@ class ProfilePage extends StatelessWidget {
             icon: Icon(Icons.history),
             label: 'Commandes',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );

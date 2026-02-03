@@ -12,7 +12,7 @@ class ManageOrdersPage extends StatelessWidget {
         'date': '02/02/2026',
         'status': 'pending',
         'frame': 'Classic Ray',
-        'price': '120.00'
+        'price': '120.00',
       },
       {
         'id': 'ORD-2024-002',
@@ -20,7 +20,7 @@ class ManageOrdersPage extends StatelessWidget {
         'date': '01/02/2026',
         'status': 'validated',
         'frame': 'Orange Sunset',
-        'price': '250.00'
+        'price': '250.00',
       },
     ];
 
@@ -43,7 +43,9 @@ class ManageOrdersPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              border: Border.all(
+                color: Colors.grey.withAlpha((0.1 * 255).round()),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,18 +53,37 @@ class ManageOrdersPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(order['id'], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                    Text(
+                      order['id'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
                     _buildStatusChip(order['status']),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(order['client'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  order['client'],
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 4),
-                    Text(order['date'], style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text(
+                      order['date'],
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
                   ],
                 ),
                 const Divider(height: 24),
@@ -72,15 +93,27 @@ class ManageOrdersPage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Monture', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text(order['frame'], style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Monture',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        Text(
+                          order['frame'],
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text('Total', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text('${order['price']} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(
+                          'Total',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        Text(
+                          '${order['price']} €',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ],
@@ -90,7 +123,8 @@ class ManageOrdersPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => _showPrescription(context, order['client']),
+                        onPressed: () =>
+                            _showPrescription(context, order['client']),
                         child: const Text('Voir Ordonnance'),
                       ),
                     ),
@@ -98,7 +132,10 @@ class ManageOrdersPage extends StatelessWidget {
                     if (order['status'] == 'pending') ...[
                       IconButton(
                         onPressed: () {},
-                        icon: const Icon(Icons.check_circle, color: Colors.green),
+                        icon: const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                        ),
                         tooltip: 'Valider',
                       ),
                       IconButton(
@@ -137,12 +174,16 @@ class ManageOrdersPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha((0.1 * 255).round()),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -164,12 +205,21 @@ class ManageOrdersPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Ordonnance - Détails', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                const Text(
+                  'Ordonnance - Détails',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
               ],
             ),
             const SizedBox(height: 20),
-            Text('Patient: $client', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Patient: $client',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             _tableRow('Oeil Droit (OD)', 'Sph: -2.50 | Cyl: +0.50 | Axe: 90°'),
             const Divider(),

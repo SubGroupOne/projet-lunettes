@@ -9,7 +9,7 @@ class ScannerOrdonnancePage extends StatefulWidget {
 }
 
 class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
-  bool _isScanning = true;
+  final bool _isScanning = true;
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +31,17 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withAlpha((0.3 * 255).round()),
               ),
               child: Center(
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.85,
                   height: 250,
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFF0080FF), width: 2),
+                    border: Border.all(
+                      color: const Color(0xFF0080FF),
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Stack(
@@ -67,8 +70,15 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
                 children: [
                   TextButton.icon(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF0080FF), size: 18),
-                    label: const Text('Retour', style: TextStyle(color: Color(0xFF0080FF), fontSize: 18)),
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      color: Color(0xFF0080FF),
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'Retour',
+                      style: TextStyle(color: Color(0xFF0080FF), fontSize: 18),
+                    ),
                   ),
                   const Text(
                     'Scanner Ordonnance',
@@ -80,7 +90,10 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
                   ),
                   TextButton(
                     onPressed: () {},
-                    child: const Text('Flash', style: TextStyle(color: Color(0xFF0080FF), fontSize: 18)),
+                    child: const Text(
+                      'Flash',
+                      style: TextStyle(color: Color(0xFF0080FF), fontSize: 18),
+                    ),
                   ),
                 ],
               ),
@@ -92,9 +105,12 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
             child: Padding(
               padding: const EdgeInsets.only(top: 300),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withAlpha((0.6 * 255).round()),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -139,7 +155,11 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
                   const Text(
                     'Veuillez vérifier les informations extraites avec votre document original.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic),
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
@@ -149,7 +169,10 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const PaymentConfirmationPage()),
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const PaymentConfirmationPage(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -163,7 +186,13 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Vérifier assurance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            'Vérifier assurance',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           SizedBox(width: 8),
                           Icon(Icons.arrow_forward),
                         ],
@@ -187,7 +216,11 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
           width: 40,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -206,7 +239,11 @@ class _ScannerOrdonnancePageState extends State<ScannerOrdonnancePage> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Container(
@@ -234,7 +271,8 @@ class ScanningLine extends StatefulWidget {
   State<ScanningLine> createState() => _ScanningLineState();
 }
 
-class _ScanningLineState extends State<ScanningLine> with SingleTickerProviderStateMixin {
+class _ScanningLineState extends State<ScanningLine>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -265,16 +303,16 @@ class _ScanningLineState extends State<ScanningLine> with SingleTickerProviderSt
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0080FF).withOpacity(0.5),
+                  color: const Color(0xFF0080FF).withAlpha((0.5 * 255).round()),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
               ],
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF0080FF).withOpacity(0),
+                  const Color(0xFF0080FF).withAlpha((0 * 255).round()),
                   const Color(0xFF0080FF),
-                  const Color(0xFF0080FF).withOpacity(0),
+                  const Color(0xFF0080FF).withAlpha((0 * 255).round()),
                 ],
               ),
             ),

@@ -10,7 +10,10 @@ class OpticianDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Espace Opticien', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Espace Opticien',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -36,39 +39,47 @@ class OpticianDashboard extends StatelessWidget {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 30),
-            
+
             _buildStatCards(),
-            
+
             const SizedBox(height: 40),
-            
+
             const Text(
               'Actions Rapides',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            
+
             _buildActionCard(
               context,
               title: 'Gestion des Montures',
-              description: 'Ajouter, modifier ou supprimer des lunettes du catalogue.',
+              description:
+                  'Ajouter, modifier ou supprimer des lunettes du catalogue.',
               icon: Icons.inventory_2_outlined,
               color: Colors.blue,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageFramesPage())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageFramesPage()),
+              ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             _buildActionCard(
               context,
               title: 'Commandes Clients',
-              description: 'Consulter les ordonnances et valider les commandes.',
+              description:
+                  'Consulter les ordonnances et valider les commandes.',
               icon: Icons.shopping_bag_outlined,
               color: Colors.orange,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageOrdersPage())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageOrdersPage()),
+              ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             _buildActionCard(
               context,
               title: 'Statistiques de Vente',
@@ -91,7 +102,12 @@ class OpticianDashboard extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _statCard('Montures', '45', Icons.glasses, Colors.blue),
+          child: _statCard(
+            'Montures',
+            '45',
+            Icons.remove_red_eye_outlined,
+            Colors.blue,
+          ),
         ),
       ],
     );
@@ -105,7 +121,7 @@ class OpticianDashboard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -116,14 +132,18 @@ class OpticianDashboard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 30),
           const SizedBox(height: 15),
-          Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
           Text(label, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
-  Widget _buildActionCard(BuildContext context, {
+  Widget _buildActionCard(
+    BuildContext context, {
     required String title,
     required String description,
     required IconData icon,
@@ -138,14 +158,14 @@ class OpticianDashboard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          border: Border.all(color: Colors.grey.withAlpha((0.1 * 255).round())),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withAlpha((0.1 * 255).round()),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Icon(icon, color: color, size: 28),
@@ -155,9 +175,18 @@ class OpticianDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(description, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
                 ],
               ),
             ),
