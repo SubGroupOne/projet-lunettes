@@ -1,4 +1,8 @@
+import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'scanner_ordonnance_page.dart';
 
 class VirtualTryOnPage extends StatefulWidget {
@@ -9,379 +13,462 @@ class VirtualTryOnPage extends StatefulWidget {
 }
 
 class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
-  // Navigation states
-  int _selectedColorIndex = 0;
-  int _selectedStyleIndex = 1; // Classique selected by default
+  // Navigation and Filtering
+  int _selectedFrameIndex = -1;
+  String _selectedCategory = "Tout";
+  double _glassesSizeScale = 1.25; 
 
-  final List<Color> _colors = [
-    const Color(0xFF4A4AFF), // Blue
-    const Color(0xFFA56338), // Brown
-    const Color(0xFF9EAAB6), // Grey/Blueish
-    const Color(0xFF9E1F4F), // Maroon
+  final List<String> _allFrames = [
+    'assets/blue_sunglasses.png',
+    'assets/orange_sunglasses.png',
+    'assets/tortoise_glasses.png',
+    'assets/pink_gold_glasses.png',
+    'assets/glasses.png',
   ];
 
-  final List<String> _styles = ['Aviateur', 'Classique', 'Rond'];
+
+  // Camera & Face Detection
+  CameraController? _cameraController;
+  FaceDetector? _faceDetector;
+  bool _isBusy = false;
+  List<Face> _faces = [];
+  bool _isCameraReady = false;
+  bool _isFrontCamera = true; // Track camera direction
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+    _initializeDetector();
+  }
+
+  void _initializeDetector() {
+    final options = FaceDetectorOptions(
+      enableContours: true,
+      enableLandmarks: true,
+      performanceMode: FaceDetectorMode.fast,
+    );
+    _faceDetector = FaceDetector(options: options);
+  }
+
+  Future<void> _initializeCamera() async {
+    final status = await Permission.camera.request();
+    if (status.isGranted) {
+      final cameras = await availableCameras();
+      final targetDirection = _isFrontCamera 
+          ? CameraLensDirection.front 
+          : CameraLensDirection.back;
+
+      final selectedCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == targetDirection,
+        orElse: () => cameras.first,
+      );
+
+      _cameraController = CameraController(
+        selectedCamera,
+        ResolutionPreset.high,
+        enableAudio: false,
+        imageFormatGroup: kIsWeb ? ImageFormatGroup.jpeg : (defaultTargetPlatform == TargetPlatform.android ? ImageFormatGroup.yuv420 : ImageFormatGroup.bgra8888),
+      );
+
+      try {
+        await _cameraController!.initialize();
+        if (!mounted) return;
+
+        _cameraController!.startImageStream(_processCameraImage);
+
+        setState(() {
+          _isCameraReady = true;
+        });
+      } catch (e) {
+        debugPrint('Camera initialization error: $e');
+      }
+    }
+  }
+
+  void _processCameraImage(CameraImage image) {
+    if (_isBusy) return;
+    _isBusy = true;
+
+    _processImage(image).then((_) {
+      _isBusy = false;
+    });
+  }
+
+  Future<void> _processImage(CameraImage image) async {
+    final WriteBuffer allBytes = WriteBuffer();
+    for (final Plane plane in image.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    final bytes = allBytes.done().buffer.asUint8List();
+
+    final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
+
+    final cameras = await availableCameras();
+    final camera = cameras.firstWhere(
+      (c) => c.lensDirection == (_isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back),
+      orElse: () => cameras.first,
+    );
+    final imageRotation =
+        InputImageRotationValue.fromRawValue(camera.sensorOrientation) ??
+        InputImageRotation.rotation0deg;
+
+    final inputImageFormat =
+        InputImageFormatValue.fromRawValue(image.format.raw) ??
+        InputImageFormat.yuv420;
+
+    final metadata = InputImageMetadata(
+      size: imageSize,
+      rotation: imageRotation,
+      format: inputImageFormat,
+      bytesPerRow: image.planes[0].bytesPerRow,
+    );
+
+    final inputImage = InputImage.fromBytes(bytes: bytes, metadata: metadata);
+
+    if (!kIsWeb) {
+      try {
+        final faces = await _faceDetector?.processImage(inputImage);
+        if (mounted) {
+          setState(() {
+            _faces = faces ?? [];
+          });
+        }
+      } catch (e) {
+        debugPrint('Face detection error: $e');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    _faceDetector?.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 1. Camera Background (Placeholder)
-          Image.asset('assets/face_placeholder.png', fit: BoxFit.cover),
-
-          // 2. Header
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
+      backgroundColor: const Color(0xFF101820), // Dark background from mockup
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 1. Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      // Back Button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha((0.5 * 255).round()),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                        ),
+                  const SizedBox(width: 48), // Spacer for centering
+                  const Expanded(
+                    child: Text(
+                      'Essais Virtuel',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
-
-                      const Spacer(),
-
-                      // Title Pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha((0.5 * 255).round()),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Essai Virtuel AI',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _toggleCamera,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-
-                      const Spacer(),
-
-                      // Help Icon
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha((0.5 * 255).round()),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.help_outline,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {},
-                        ),
+                      child: const Icon(
+                        Icons.flip_camera_ios_outlined,
+                        color: Colors.black,
+                        size: 24,
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // 3. AR Overlay (Glasses Guide - Simplified visual representation)
-          // Simplified Visual Guide (The blue lines in the screenshot)
-          Center(
-            child: CustomPaint(
-              size: const Size(300, 150),
-              painter: GlassesGuidePainter(),
-            ),
-          ),
-
-          // Focus Brackets
-          Center(
-            child: SizedBox(
-              width: 350,
-              height: 250,
-              child: CustomPaint(painter: CornerBracketsPainter()),
-            ),
-          ),
-
-          // 4. Controls & Bottom Panel
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Style Selector & Color Selector Row
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      // Colors (Vertical-ish but presented in Row for this layout)
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(
-                            (0.2 * 255).round(),
-                          ), // Glassmorphismish
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: List.generate(_colors.length, (index) {
-                            return GestureDetector(
-                              onTap: () =>
-                                  setState(() => _selectedColorIndex = index),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                width: 24,
-                                height: 48, // Tall pill shape
-                                decoration: BoxDecoration(
-                                  color: _colors[index],
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: _selectedColorIndex == index
-                                      ? Border.all(
-                                          color: Colors.white,
-                                          width: 2,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      // Styles
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha((0.2 * 255).round()),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(_styles.length, (index) {
-                              final isSelected = _selectedStyleIndex == index;
-                              return GestureDetector(
-                                onTap: () =>
-                                    setState(() => _selectedStyleIndex = index),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF4A90E2)
-                                        : Colors
-                                              .transparent, // Blue for selected
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    _styles[index],
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Product Card
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.all(12),
+            // 2. Camera Viewport (Bounded Area)
+            Expanded(
+              child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(
-                      (0.3 * 255).round(),
-                    ), // Glass effect
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withAlpha((0.2 * 255).round()),
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                clipBehavior: Clip.antiAlias,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Camera Feed
+                        _isCameraReady && _cameraController != null
+                            ? Center(
+                                child: CameraPreview(_cameraController!),
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(color: Colors.white24),
+                              ),
+
+                        // Glasses Overlay (Scoped to this stack)
+                        if (_isCameraReady && _selectedFrameIndex != -1)
+                          if (_faces.isNotEmpty)
+                            ..._faces.map((face) => _buildGlassesOverlay(face, constraints.biggest))
+                          else if (kIsWeb)
+                            _buildMockGlassesOverlay(constraints.biggest),
+
+                        // Corner Brackets (Focus Markers)
+                        CustomPaint(
+                          painter: CornerBracketsPainter(),
+                        ),
+
+                        // AR Guide (Only if NO frame selected)
+                        if (_faces.isEmpty && !kIsWeb && _selectedFrameIndex == -1)
+                          Center(
+                            child: CustomPaint(
+                              size: const Size(260, 130),
+                              painter: GlassesGuidePainter(),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // 3. Size Slider (Integrated into Bottom Panel)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.zoom_in, color: Colors.white54, size: 18),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: const Color(0xFF4A90E2),
+                        inactiveTrackColor: Colors.white12,
+                        thumbColor: Colors.white,
+                        trackHeight: 2,
+                      ),
+                      child: Slider(
+                        value: _glassesSizeScale,
+                        min: 0.8,
+                        max: 2.5,
+                        onChanged: (value) => setState(() => _glassesSizeScale = value),
+                      ),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      // Thumbnail
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE0C2), // Light peach bg
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.check_box_outline_blank,
-                          color: Colors.white,
-                        ), // Placeholder for frame thumbnail
-                      ),
-                      const SizedBox(width: 16),
-                      // Info
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "L'Artiste - Bleu Minuit",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              "Monture acétate haute qualité",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Price
-                      const Text(
-                        "129€",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Bottom Buttons
-                Container(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                  child: Row(
-                    children: [
-                      // Camera Button
-                      Expanded(
-                        child: Container(
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha((0.15 * 255).round()),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Prendre une photo",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Scan Button
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ScannerOrdonnancePage(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF4A90E2), // Bright Blue
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(
-                                  Icons.qr_code_scanner,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "Scanner Ordonnance",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Moon/Theme Toggle (Bottom Right Corner Overlay)
-                // Actually the design implementation places it slightly differently but for now let's skip or place absolutely.
-              ],
-            ),
-          ),
-
-          // Theme Toggle Floating
-          Positioned(
-            bottom: 24,
-            right: 24,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+                  const Text("Taille", style: TextStyle(color: Colors.white54, fontSize: 10)),
+                ],
               ),
-              child: const Icon(Icons.nightlight_round, color: Colors.black),
+            ),
+
+            // 4. Controls & Selection Area
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1A1F26), // Darker bottom panel
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Category Filter
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: ["Tout", "Soleil", "Optique", "Luxe"].map((cat) {
+                        final isSelected = _selectedCategory == cat;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF4A90E2) : Colors.white.withAlpha(20),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              cat,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.white70,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Frame Gallery
+                  SizedBox(
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _allFrames.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = _selectedFrameIndex == index;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedFrameIndex = index),
+                          child: Container(
+                            width: 100,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFF4A90E2) : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Image.asset(_allFrames[index], fit: BoxFit.contain),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Add to Cart Button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ElevatedButton(
+                      onPressed: _selectedFrameIndex == -1 ? null : () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4A90E2),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Ajouter au panier",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleCamera() async {
+    if (_cameraController == null) return;
+    
+    setState(() {
+      _isCameraReady = false;
+      _isFrontCamera = !_isFrontCamera;
+    });
+
+    await _cameraController!.dispose();
+    await _initializeCamera();
+  }
+
+  String _getAssetForSelection() {
+    if (_selectedFrameIndex == -1) return ''; 
+    return _allFrames[_selectedFrameIndex];
+  }
+
+  bool _shouldApplyTint() {
+    return false; 
+  }
+
+  // Helper to check if we have a valid selection
+  bool get _hasSelection => _selectedFrameIndex != -1;
+
+  Widget _buildGlassesOverlay(Face face, Size viewportSize) {
+    if (_cameraController == null || _selectedFrameIndex == -1) return const SizedBox.shrink();
+
+    // Camera image size (typically landscape, so we swap for orientation)
+    final double imgWidth = _cameraController!.value.previewSize!.height;
+    final double imgHeight = _cameraController!.value.previewSize!.width;
+
+    final double scaleX = viewportSize.width / imgWidth;
+    final double scaleY = viewportSize.height / imgHeight;
+
+    final rect = face.boundingBox;
+
+    // Position glasses based on eye landmarks or bounding box
+    final width = rect.width * scaleX * _glassesSizeScale; 
+    final height = width * 0.45; 
+    
+    // Adjust top positioning to sit on the bridge of the nose better
+    final top = rect.top * scaleY + (rect.height * 0.18 * scaleY); 
+    
+    // Calculate center-based positioning
+    final faceCenterX = rect.center.dx * scaleX;
+
+    return Positioned(
+      left: faceCenterX - (width / 2), 
+      top: top,
+      width: width,
+      height: height,
+      child: Transform.rotate(
+        angle: (face.headEulerAngleZ ?? 0) * (3.14159 / 180),
+        child: Image.asset(
+          _getAssetForSelection(),
+          fit: BoxFit.contain,
+          opacity: const AlwaysStoppedAnimation(0.95), // Subtle transparency for realism
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockGlassesOverlay(Size viewportSize) {
+    if (_selectedFrameIndex == -1) return const SizedBox.shrink();
+    final width = 180.0 * _glassesSizeScale;
+    final height = width * 0.4;
+    
+    return Positioned(
+      left: (viewportSize.width - width) / 2,
+      top: viewportSize.height * 0.35, 
+      width: width,
+      height: height,
+      child: Column(
+        children: [
+          if (kIsWeb)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha((0.5 * 255).round()),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: const Text(
+                "Mode Démo Web",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          Expanded(
+            child: Image.asset(
+              _getAssetForSelection(),
+              fit: BoxFit.contain,
             ),
           ),
         ],
@@ -390,57 +477,23 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
   }
 }
 
-// Painters for the AR Guide
-
+// Painters remain same for fallback
 class GlassesGuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF3F3F95)
-          .withAlpha((0.8 * 255).round()) // Dark blueish purple
+      ..color = const Color(0xFF3F3F95).withAlpha((0.8 * 255).round())
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
-
     final path = Path();
-
-    // Draw infinity shape / glasses shape simplified
-    // Left Lens
-    path.addOval(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.3, size.height / 2),
-        width: size.width * 0.35,
-        height: size.height * 0.6,
-      ),
-    );
-
-    // Right Lens
-    path.addOval(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.7, size.height / 2),
-        width: size.width * 0.35,
-        height: size.height * 0.6,
-      ),
-    );
-
-    // Bridge (Simplified)
+    path.addOval(Rect.fromCenter(center: Offset(size.width * 0.3, size.height / 2), width: size.width * 0.35, height: size.height * 0.6));
+    path.addOval(Rect.fromCenter(center: Offset(size.width * 0.7, size.height / 2), width: size.width * 0.35, height: size.height * 0.6));
     path.moveTo(size.width * 0.47, size.height / 2);
-    path.quadraticBezierTo(
-      size.width * 0.5,
-      size.height * 0.4,
-      size.width * 0.53,
-      size.height / 2,
-    );
-
+    path.quadraticBezierTo(size.width * 0.5, size.height * 0.4, size.width * 0.53, size.height / 2);
     canvas.drawPath(path, paint);
-
-    // Fill slightly
-    final fillPaint = Paint()
-      ..color = Colors.white.withAlpha((0.1 * 255).round())
-      ..style = PaintingStyle.fill;
-
+    final fillPaint = Paint()..color = Colors.white.withAlpha((0.1 * 255).round())..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
