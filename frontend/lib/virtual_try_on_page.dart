@@ -34,6 +34,7 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
   List<Face> _faces = [];
   bool _isCameraReady = false;
   bool _isFrontCamera = true; // Track camera direction
+  Offset? _mockGlassesOffset; // For manual positioning on PC/Web
 
   @override
   void initState() {
@@ -201,39 +202,88 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
                 clipBehavior: Clip.antiAlias,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Camera Feed
-                        _isCameraReady && _cameraController != null
-                            ? Center(
-                                child: CameraPreview(_cameraController!),
-                              )
-                            : const Center(
-                                child: CircularProgressIndicator(color: Colors.white24),
-                              ),
-
-                        // Glasses Overlay (Scoped to this stack)
-                        if (_isCameraReady && _selectedFrameIndex != -1)
-                          if (_faces.isNotEmpty)
-                            ..._faces.map((face) => _buildGlassesOverlay(face, constraints.biggest))
-                          else if (kIsWeb)
-                            _buildMockGlassesOverlay(constraints.biggest),
-
-                        // Corner Brackets (Focus Markers)
-                        CustomPaint(
-                          painter: CornerBracketsPainter(),
-                        ),
-
-                        // AR Guide (Only if NO frame selected)
-                        if (_faces.isEmpty && !kIsWeb && _selectedFrameIndex == -1)
-                          Center(
-                            child: CustomPaint(
-                              size: const Size(260, 130),
-                              painter: GlassesGuidePainter(),
+                    return MouseRegion(
+                      onHover: (event) {
+                        if (_faces.isEmpty) {
+                          setState(() {
+                            _mockGlassesOffset = event.localPosition;
+                          });
+                        }
+                      },
+                      child: GestureDetector(
+                        onPanUpdate: (details) {
+                          if (_faces.isEmpty) {
+                            setState(() {
+                              _mockGlassesOffset = details.localPosition;
+                            });
+                          }
+                        },
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Camera Feed
+                            _isCameraReady && _cameraController != null
+                                ? Center(
+                                    child: CameraPreview(_cameraController!),
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator(color: Colors.white24),
+                                  ),
+    
+                            // Glasses Overlay (Scoped to this stack)
+                            if (_isCameraReady && _selectedFrameIndex != -1)
+                              if (_faces.isNotEmpty)
+                                ..._faces.map((face) => _buildGlassesOverlay(face, constraints.biggest))
+                              else ...[
+                                _buildMockGlassesOverlay(constraints.biggest),
+                                 _buildDemoModeLabel(!kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS)),
+                              ],
+    
+                            // Corner Brackets (Focus Markers)
+                            CustomPaint(
+                              painter: CornerBracketsPainter(),
                             ),
-                          ),
-                      ],
+    
+                            // AR Guide / Silhouette (When no faces detected)
+                            if (_faces.isEmpty)
+                              Center(
+                                child: Opacity(
+                                  opacity: 0.3,
+                                  child: CustomPaint(
+                                    size: const Size(200, 300),
+                                    painter: FaceGuidePainter(),
+                                  ),
+                                ),
+                              ),
+                            
+                            // Interaction Hint
+                            if (_faces.isEmpty && _selectedFrameIndex != -1)
+                              Positioned(
+                                bottom: 12,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: Text(
+                                    "Glissez pour ajuster les lunettes",
+                                    style: TextStyle(
+                                      color: Colors.white.withAlpha((0.6 * 255).round()),
+                                      fontSize: 10,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ),
+    
+                            if (_faces.isEmpty && !kIsWeb && _selectedFrameIndex == -1)
+                              Center(
+                                child: CustomPaint(
+                                  size: const Size(260, 130),
+                                  painter: GlassesGuidePainter(),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -407,71 +457,117 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
     final double scaleX = viewportSize.width / imgWidth;
     final double scaleY = viewportSize.height / imgHeight;
 
-    final rect = face.boundingBox;
+    final leftEye = face.landmarks[FaceLandmarkType.leftEye];
+    final rightEye = face.landmarks[FaceLandmarkType.rightEye];
 
-    // Position glasses based on eye landmarks or bounding box
-    final width = rect.width * scaleX * _glassesSizeScale; 
-    final height = width * 0.45; 
+    double centerX, centerY, width, rotation;
+
+    if (leftEye != null && rightEye != null) {
+      // Use landmarks for precise alignment
+      final leftPoint = Offset(leftEye.position.x * scaleX, leftEye.position.y * scaleY);
+      final rightPoint = Offset(rightEye.position.x * scaleX, rightEye.position.y * scaleY);
+      
+      centerX = (leftPoint.dx + rightPoint.dx) / 2;
+      centerY = (leftPoint.dy + rightPoint.dy) / 2;
+      
+      // Width based on eye distance * multiplier
+      width = (rightPoint.dx - leftPoint.dx).abs() * 2.2 * _glassesSizeScale;
+      rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
+    } else {
+      // Fallback to bounding box
+      final rect = face.boundingBox;
+      centerX = rect.center.dx * scaleX;
+      centerY = rect.top * scaleY + (rect.height * 0.25 * scaleY);
+      width = rect.width * scaleX * _glassesSizeScale;
+      rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
+    }
+
+    final height = width * 0.45;
+
+    // Simulate 3D rotation using Yaw (Y) and Pitch (X)
+    final yaw = (face.headEulerAngleY ?? 0); // Side to side
+    final pitch = (face.headEulerAngleX ?? 0); // Up and down
+
+    // Yaw affect horizontal scale (foreshortening)
+    double yawScale = (1.0 - (yaw.abs() / 100)).clamp(0.7, 1.0);
     
-    // Adjust top positioning to sit on the bridge of the nose better
-    final top = rect.top * scaleY + (rect.height * 0.18 * scaleY); 
-    
-    // Calculate center-based positioning
-    final faceCenterX = rect.center.dx * scaleX;
+    // Pitch affects vertical offset (perspective)
+    double pitchOffset = (pitch / 10) * (height / 4);
 
     return Positioned(
-      left: faceCenterX - (width / 2), 
-      top: top,
-      width: width,
+      left: centerX - (width * yawScale / 2),
+      top: centerY - (height / 2) + pitchOffset,
+      width: width * yawScale,
       height: height,
-      child: Transform.rotate(
-        angle: (face.headEulerAngleZ ?? 0) * (3.14159 / 180),
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..rotateZ(rotation)
+          ..rotateY(yaw * (3.14159 / 180) * 0.5) // Subtle 3D-like turn
+          ..rotateX(pitch * (3.14159 / 180) * 0.2), // Subtle tilt
         child: Image.asset(
           _getAssetForSelection(),
           fit: BoxFit.contain,
-          opacity: const AlwaysStoppedAnimation(0.95), // Subtle transparency for realism
+          opacity: const AlwaysStoppedAnimation(0.95),
         ),
       ),
     );
   }
 
   Widget _buildMockGlassesOverlay(Size viewportSize) {
-    if (_selectedFrameIndex == -1) return const SizedBox.shrink();
-    final width = 180.0 * _glassesSizeScale;
-    final height = width * 0.4;
+    final double width = 180.0 * _glassesSizeScale;
+    final double height = width * 0.45;
     
+    // Use the tracked offset or default to center
+    final double centerX = (_mockGlassesOffset?.dx ?? (viewportSize.width / 2));
+    final double centerY = (_mockGlassesOffset?.dy ?? (viewportSize.height * 0.35));
+
+    // Dynamic tilt based on position relative to center
+    final double relativeX = (centerX - viewportSize.width / 2) / (viewportSize.width / 2);
+    final double rotationY = relativeX * 0.4; // Subtle 3D-like turn
+
     return Positioned(
-      left: (viewportSize.width - width) / 2,
-      top: viewportSize.height * 0.35, 
+      left: centerX - (width / 2),
+      top: centerY - (height / 2), 
       width: width,
       height: height,
-      child: Column(
-        children: [
-          if (kIsWeb)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.black.withAlpha((0.5 * 255).round()),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: const Text(
-                "Mode Démo Web",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          Expanded(
-            child: Image.asset(
-              _getAssetForSelection(),
-              fit: BoxFit.contain,
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // Perspective
+          ..rotateY(rotationY),
+        child: Image.asset(
+          _getAssetForSelection(),
+          fit: BoxFit.contain,
+          opacity: const AlwaysStoppedAnimation(0.95),
+        ),
+      ),
+    );
+  }
+
+  // Position the Demo Mode label separately to avoid squashing
+  Widget _buildDemoModeLabel(bool isDesktop) {
+    return Positioned(
+      top: 12,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.black.withAlpha((0.5 * 255).round()),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Text(
+            isDesktop ? "Mode Démo (Bureau)" : "Mode Démo Web",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -535,6 +631,37 @@ class CornerBracketsPainter extends CustomPainter {
       Offset(size.width, size.height - len),
       paint,
     );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class FaceGuidePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final path = Path();
+    
+    // Oval for head
+    path.addOval(Rect.fromLTWH(size.width * 0.1, size.height * 0.05, size.width * 0.8, size.height * 0.8));
+    
+    // Guide for eyes
+    path.moveTo(size.width * 0.25, size.height * 0.4);
+    path.lineTo(size.width * 0.4, size.height * 0.4);
+    
+    path.moveTo(size.width * 0.6, size.height * 0.4);
+    path.lineTo(size.width * 0.75, size.height * 0.4);
+    
+    // Guide for nose bridge
+    path.moveTo(size.width * 0.45, size.height * 0.4);
+    path.quadraticBezierTo(size.width * 0.5, size.height * 0.35, size.width * 0.55, size.height * 0.4);
+
+    canvas.drawPath(path, paint);
   }
 
   @override
