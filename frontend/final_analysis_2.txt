@@ -1,0 +1,16 @@
+﻿Analyzing frontend...                                           
+
+warning - Unused import: 'scanner_ordonnance_page.dart' - lib\virtual_try_on_page.dart:9:8 - unused_import
+warning - The value of the local variable 'pLeftInner' isn't used - lib\virtual_try_on_page.dart:111:11 - unused_local_variable
+warning - The value of the local variable 'pLeftOuter' isn't used - lib\virtual_try_on_page.dart:112:11 - unused_local_variable
+warning - The value of the local variable 'pRightInner' isn't used - lib\virtual_try_on_page.dart:113:11 - unused_local_variable
+warning - The value of the local variable 'pRightOuter' isn't used - lib\virtual_try_on_page.dart:114:11 - unused_local_variable
+warning - The declaration '_shouldApplyTint' isn't referenced - lib\virtual_try_on_page.dart:487:8 - unused_element
+warning - The declaration '_hasSelection' isn't referenced - lib\virtual_try_on_page.dart:492:12 - unused_element
+warning - The value of the local variable 'noseBridge' isn't used - lib\virtual_try_on_page.dart:503:13 - unused_local_variable
+   info - 'dart:js' is deprecated and shouldn't be used. Use dart:js_interop instead - lib\web_detection_helper.dart:1:1 - deprecated_member_use
+   info - Don't use web-only libraries outside Flutter web plugins - lib\web_detection_helper.dart:1:1 - avoid_web_libraries_in_flutter
+warning - Unused import: 'dart:convert' - lib\web_detection_helper.dart:2:8 - unused_import
+   info - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead - lib\web_detection_helper.dart:4:1 - deprecated_member_use
+   info - Don't use web-only libraries outside Flutter web plugins - lib\web_detection_helper.dart:4:1 - avoid_web_libraries_in_flutter
+

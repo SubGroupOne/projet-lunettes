@@ -7,12 +7,15 @@ class Product {
   final double rating;
   final int? discountPercent;
 
+  final String? tryOnAsset; // transparent PNG for virtual try-on
+
   Product({
     required this.name,
     required this.desc,
     required this.price,
     required this.image,
     this.imageUrl,
+    this.tryOnAsset,
     this.rating = 4.5,
     this.discountPercent,
   });
@@ -33,6 +36,7 @@ class EyeglassesProducts {
       desc: 'Aviateur. Noir Onyx',
       price: '45 000 F',
       image: 'assets/photos/men_accessories_embellished_1.jpeg',
+      tryOnAsset: 'assets/blue_sunglasses.png',
       rating: 4.8,
       discountPercent: 10,
     ),
@@ -41,6 +45,7 @@ class EyeglassesProducts {
       desc: 'Carré. Anthracite',
       price: '38 000 F',
       image: 'assets/photos/men_accessories_embellished_2.jpeg',
+      tryOnAsset: 'assets/orange_sunglasses.png',
       rating: 4.5,
     ),
     Product(
@@ -70,6 +75,7 @@ class EyeglassesProducts {
       desc: 'Intemporel',
       price: '48 000 F',
       image: 'assets/photos/glasses_photo_03.jpeg',
+      tryOnAsset: 'assets/glasses.png',
       rating: 4.9,
       discountPercent: 15,
     ),
@@ -95,6 +101,7 @@ class EyeglassesProducts {
       desc: 'Rond. Or 18k',
       price: '52 000 F',
       image: 'assets/photos/glasses_photo_01.jpeg',
+      tryOnAsset: 'assets/pink_gold_glasses.png',
       rating: 4.9,
       discountPercent: 20,
     ),
@@ -103,6 +110,7 @@ class EyeglassesProducts {
       desc: 'Ovale. Écaille',
       price: '41 000 F',
       image: 'assets/photos/glasses_photo_02.jpeg',
+      tryOnAsset: 'assets/tortoise_glasses.png',
       rating: 4.7,
     ),
     Product(

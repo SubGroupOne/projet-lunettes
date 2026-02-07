@@ -1,0 +1,27 @@
+﻿Analyzing frontend...                                           
+
+  error - Undefined class 'Point' - lib\mobile_detection_helper.dart:28:28 - undefined_class
+  error - Undefined name 'x' - lib\mobile_detection_helper.dart:29:31 - undefined_identifier
+  error - Undefined name 'y' - lib\mobile_detection_helper.dart:29:45 - undefined_identifier
+warning - The value of the local variable 'pLeftInner' isn't used - lib\virtual_try_on_page.dart:111:11 - unused_local_variable
+warning - The value of the local variable 'pLeftOuter' isn't used - lib\virtual_try_on_page.dart:112:11 - unused_local_variable
+warning - The value of the local variable 'pRightInner' isn't used - lib\virtual_try_on_page.dart:113:11 - unused_local_variable
+warning - The value of the local variable 'pRightOuter' isn't used - lib\virtual_try_on_page.dart:114:11 - unused_local_variable
+  error - Undefined name 'InputImageRotationValue' - lib\virtual_try_on_page.dart:216:9 - undefined_identifier
+  error - Undefined name 'InputImageRotation' - lib\virtual_try_on_page.dart:217:9 - undefined_identifier
+  error - Undefined name 'InputImageFormatValue' - lib\virtual_try_on_page.dart:220:9 - undefined_identifier
+  error - Undefined name 'InputImageFormat' - lib\virtual_try_on_page.dart:221:9 - undefined_identifier
+  error - The method 'InputImageMetadata' isn't defined for the type '_VirtualTryOnPageState' - lib\virtual_try_on_page.dart:223:22 - undefined_method
+  error - Undefined name 'InputImage' - lib\virtual_try_on_page.dart:230:24 - undefined_identifier
+warning - The declaration '_shouldApplyTint' isn't referenced - lib\virtual_try_on_page.dart:509:8 - unused_element
+warning - The declaration '_hasSelection' isn't referenced - lib\virtual_try_on_page.dart:514:12 - unused_element
+warning - The value of the local variable 'noseBridge' isn't used - lib\virtual_try_on_page.dart:525:13 - unused_local_variable
+warning - The declaration '_buildMockGlassesOverlay' isn't referenced - lib\virtual_try_on_page.dart:643:10 - unused_element
+  error - Undefined name '_mockGlassesOffset' - lib\virtual_try_on_page.dart:648:29 - undefined_identifier
+  error - Undefined name '_mockGlassesOffset' - lib\virtual_try_on_page.dart:649:29 - undefined_identifier
+   info - 'dart:js' is deprecated and shouldn't be used. Use dart:js_interop instead - lib\web_detection_helper.dart:1:1 - deprecated_member_use
+   info - Don't use web-only libraries outside Flutter web plugins - lib\web_detection_helper.dart:1:1 - avoid_web_libraries_in_flutter
+warning - Unused import: 'dart:convert' - lib\web_detection_helper.dart:2:8 - unused_import
+   info - 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead - lib\web_detection_helper.dart:4:1 - deprecated_member_use
+   info - Don't use web-only libraries outside Flutter web plugins - lib\web_detection_helper.dart:4:1 - avoid_web_libraries_in_flutter
+

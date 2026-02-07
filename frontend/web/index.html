@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,12 +28,63 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>smart_vision</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js" crossorigin="anonymous"></script>
+  <script>
+    async function createFaceLandmarker() {
+      // The CDN bundle exports classes to the global scope or a specific object
+      // depending on the version. We'll try to find them.
+      const visionClasses = window.tasksVision || {
+        FilesetResolver,
+        FaceLandmarker
+      };
+
+      const vision = await visionClasses.FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+      );
+      const faceLandmarker = await visionClasses.FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+          delegate: "GPU"
+        },
+        outputFaceBlendshapes: true,
+        runningMode: "VIDEO",
+        numFaces: 1
+      });
+      return faceLandmarker;
+    }
+
+    let landmarker;
+    window.initFaceLandmarker = async () => {
+      try {
+        landmarker = await createFaceLandmarker();
+        console.log("MediaPipe Face Landmarker initialized");
+        return true;
+      } catch (e) {
+        console.error("MediaPipe initialization failed:", e);
+        return false;
+      }
+    };
+
+    window.detectFace = async (videoElement) => {
+      if (!landmarker) return null;
+      try {
+        const startTimeMs = performance.now();
+        const results = await landmarker.detectForVideo(videoElement, startTimeMs);
+        return JSON.stringify(results);
+      } catch (e) {
+        console.error("MediaPipe detection failed:", e);
+        return null;
+      }
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

@@ -1,12 +1,16 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'mobile_detection_helper.dart' if (dart.library.html) 'mobile_detection_stub.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
+import 'dart:async';
+import 'web_detection_stub.dart' if (dart.library.html) 'web_detection_helper.dart';
 import 'scanner_ordonnance_page.dart';
 
 class VirtualTryOnPage extends StatefulWidget {
-  const VirtualTryOnPage({super.key});
+  final String? initialFrameAsset;
+  const VirtualTryOnPage({super.key, this.initialFrameAsset});
 
   @override
   State<VirtualTryOnPage> createState() => _VirtualTryOnPageState();
@@ -29,27 +33,106 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
 
   // Camera & Face Detection
   CameraController? _cameraController;
-  FaceDetector? _faceDetector;
+  dynamic _faceDetector;
   bool _isBusy = false;
-  List<Face> _faces = [];
+  List<dynamic> _faces = [];
+  List<dynamic>? _webFaceLandmarks;
   bool _isCameraReady = false;
   bool _isFrontCamera = true; // Track camera direction
-  Offset? _mockGlassesOffset; // For manual positioning on PC/Web
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
     _initializeDetector();
+    _handleInitialSelection();
+    if (kIsWeb) {
+      _initWebLandmarker();
+    }
   }
 
-  void _initializeDetector() {
-    final options = FaceDetectorOptions(
-      enableContours: true,
-      enableLandmarks: true,
-      performanceMode: FaceDetectorMode.fast,
-    );
-    _faceDetector = FaceDetector(options: options);
+  Future<void> _initWebLandmarker() async {
+    try {
+      final success = await WebDetectionHelper.init();
+      if (success) {
+        _startWebDetection();
+      }
+    } catch (e) {
+      debugPrint("Web Landmarker init error: $e");
+    }
+  }
+
+  void _startWebDetection() {
+    debugPrint("Web detection started loop");
+    Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+      if (!mounted || !kIsWeb || _isBusy) return;
+      
+      final videos = WebDetectionHelper.findVideos();
+      if (videos.isEmpty) {
+        // debugPrint("No video elements found for detection");
+        return;
+      }
+
+      final video = videos.first;
+      
+      _isBusy = true;
+      try {
+        final result = await WebDetectionHelper.detect(video);
+        if (result != null) {
+          final data = jsonDecode(result);
+          _processWebResults(data);
+        }
+      } catch (e) {
+        debugPrint("Web Detection error: $e");
+      }
+      _isBusy = false;
+    });
+  }
+
+  void _processWebResults(dynamic data) {
+    if (data == null || data['faceLandmarks'] == null || (data['faceLandmarks'] as List).isEmpty) {
+      if (_faces.isNotEmpty || _webFaceLandmarks != null) {
+        setState(() {
+          _faces = [];
+          _webFaceLandmarks = null;
+        });
+      }
+      return;
+    }
+
+    final landmarks = data['faceLandmarks'][0] as List;
+
+    if (mounted) {
+      setState(() {
+        _webFaceLandmarks = landmarks;
+      });
+    }
+  }
+
+  List<dynamic>? _webFaceLandmarks;
+
+  void _handleInitialSelection() {
+    if (widget.initialFrameAsset != null) {
+      // Find the index of the passed asset
+      final index = _allFrames.indexOf(widget.initialFrameAsset!);
+      if (index != -1) {
+        setState(() {
+          _selectedFrameIndex = index;
+        });
+      } else {
+        // If not found in the list, add it to the list 
+        // Note: This assumes the passed asset is a valid transparent PNG
+        setState(() {
+          _allFrames.insert(0, widget.initialFrameAsset!);
+          _selectedFrameIndex = 0;
+        });
+      }
+    }
+  }
+
+  void _initializeDetector() async {
+    if (kIsWeb) return;
+    _faceDetector = await MobileDetectionHelper.createDetector();
   }
 
   Future<void> _initializeCamera() async {
@@ -76,7 +159,9 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
         await _cameraController!.initialize();
         if (!mounted) return;
 
-        _cameraController!.startImageStream(_processCameraImage);
+        if (!kIsWeb) {
+          _cameraController!.startImageStream(_processCameraImage);
+        }
 
         setState(() {
           _isCameraReady = true;
@@ -97,48 +182,26 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
   }
 
   Future<void> _processImage(CameraImage image) async {
-    final WriteBuffer allBytes = WriteBuffer();
-    for (final Plane plane in image.planes) {
-      allBytes.putUint8List(plane.bytes);
-    }
-    final bytes = allBytes.done().buffer.asUint8List();
-
-    final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
+    if (kIsWeb || _faceDetector == null || _isBusy) return;
 
     final cameras = await availableCameras();
     final camera = cameras.firstWhere(
       (c) => c.lensDirection == (_isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back),
       orElse: () => cameras.first,
     );
-    final imageRotation =
-        InputImageRotationValue.fromRawValue(camera.sensorOrientation) ??
-        InputImageRotation.rotation0deg;
 
-    final inputImageFormat =
-        InputImageFormatValue.fromRawValue(image.format.raw) ??
-        InputImageFormat.yuv420;
-
-    final metadata = InputImageMetadata(
-      size: imageSize,
-      rotation: imageRotation,
-      format: inputImageFormat,
-      bytesPerRow: image.planes[0].bytesPerRow,
-    );
-
-    final inputImage = InputImage.fromBytes(bytes: bytes, metadata: metadata);
-
-    if (!kIsWeb) {
-      try {
-        final faces = await _faceDetector?.processImage(inputImage);
-        if (mounted) {
-          setState(() {
-            _faces = faces ?? [];
-          });
-        }
-      } catch (e) {
-        debugPrint('Face detection error: $e');
+    _isBusy = true;
+    try {
+      final faces = await MobileDetectionHelper.processImage(_faceDetector, image, camera);
+      if (mounted) {
+        setState(() {
+          _faces = faces;
+        });
       }
+    } catch (e) {
+      debugPrint('Face detection error: $e');
     }
+    _isBusy = false;
   }
 
   @override
@@ -202,42 +265,24 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
                 clipBehavior: Clip.antiAlias,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    return MouseRegion(
-                      onHover: (event) {
-                        if (_faces.isEmpty) {
-                          setState(() {
-                            _mockGlassesOffset = event.localPosition;
-                          });
-                        }
-                      },
-                      child: GestureDetector(
-                        onPanUpdate: (details) {
-                          if (_faces.isEmpty) {
-                            setState(() {
-                              _mockGlassesOffset = details.localPosition;
-                            });
-                          }
-                        },
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            // Camera Feed
-                            _isCameraReady && _cameraController != null
-                                ? Center(
-                                    child: CameraPreview(_cameraController!),
-                                  )
-                                : const Center(
-                                    child: CircularProgressIndicator(color: Colors.white24),
-                                  ),
-    
-                            // Glasses Overlay (Scoped to this stack)
-                            if (_isCameraReady && _selectedFrameIndex != -1)
-                              if (_faces.isNotEmpty)
-                                ..._faces.map((face) => _buildGlassesOverlay(face, constraints.biggest))
-                              else ...[
-                                _buildMockGlassesOverlay(constraints.biggest),
-                                 _buildDemoModeLabel(!kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS)),
-                              ],
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Camera Feed
+                        _isCameraReady && _cameraController != null
+                            ? Center(
+                                child: CameraPreview(_cameraController!),
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(color: Colors.white24),
+                              ),
+
+                        // Glasses Overlay (Scoped to this stack)
+                        if (_isCameraReady && _selectedFrameIndex != -1)
+                          if (_faces.isNotEmpty)
+                            ..._faces.map((face) => _buildGlassesOverlay(face, constraints.biggest))
+                          else if (kIsWeb && _webFaceLandmarks != null)
+                            _buildWebGlassesOverlay(constraints.biggest),
     
                             // Corner Brackets (Focus Markers)
                             CustomPaint(
@@ -245,7 +290,7 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
                             ),
     
                             // AR Guide / Silhouette (When no faces detected)
-                            if (_faces.isEmpty)
+                            if (_faces.isEmpty && _webFaceLandmarks == null)
                               Center(
                                 child: Opacity(
                                   opacity: 0.3,
@@ -256,34 +301,16 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
                                 ),
                               ),
                             
-                            // Interaction Hint
-                            if (_faces.isEmpty && _selectedFrameIndex != -1)
-                              Positioned(
-                                bottom: 12,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: Text(
-                                    "Glissez pour ajuster les lunettes",
-                                    style: TextStyle(
-                                      color: Colors.white.withAlpha((0.6 * 255).round()),
-                                      fontSize: 10,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                ),
-                              ),
-    
-                            if (_faces.isEmpty && !kIsWeb && _selectedFrameIndex == -1)
-                              Center(
-                                child: CustomPaint(
-                                  size: const Size(260, 130),
-                                  painter: GlassesGuidePainter(),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
+                        // Interaction Hint - Logic removed as we want automatic detection
+
+                        if (_faces.isEmpty && !kIsWeb && _selectedFrameIndex == -1)
+                          Center(
+                            child: CustomPaint(
+                              size: const Size(260, 130),
+                              painter: GlassesGuidePainter(),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 ),
@@ -447,95 +474,124 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
   // Helper to check if we have a valid selection
   bool get _hasSelection => _selectedFrameIndex != -1;
 
-  Widget _buildGlassesOverlay(Face face, Size viewportSize) {
+  Widget _buildGlassesOverlay(dynamic face, Size viewportSize) {
     if (_cameraController == null || _selectedFrameIndex == -1) return const SizedBox.shrink();
 
-    // Camera image size (typically landscape, so we swap for orientation)
-    final double imgWidth = _cameraController!.value.previewSize!.height;
-    final double imgHeight = _cameraController!.value.previewSize!.width;
+    try {
+      final boundingBox = MobileDetectionHelper.getBoundingBox(face);
+      final landmarks = MobileDetectionHelper.getLandmarks(face);
 
-    final double scaleX = viewportSize.width / imgWidth;
-    final double scaleY = viewportSize.height / imgHeight;
+      final leftEye = landmarks['leftEye'];
+      final rightEye = landmarks['rightEye'];
+      final noseBridge = landmarks['noseBase'];
 
-    final leftEye = face.landmarks[FaceLandmarkType.leftEye];
-    final rightEye = face.landmarks[FaceLandmarkType.rightEye];
+      // Camera image size (typically landscape, so we swap for orientation)
+      final double imgWidth = _cameraController!.value.previewSize!.height;
+      final double imgHeight = _cameraController!.value.previewSize!.width;
 
-    double centerX, centerY, width, rotation;
+      final double scaleX = viewportSize.width / imgWidth;
+      final double scaleY = viewportSize.height / imgHeight;
 
-    if (leftEye != null && rightEye != null) {
-      // Use landmarks for precise alignment
-      final leftPoint = Offset(leftEye.position.x * scaleX, leftEye.position.y * scaleY);
-      final rightPoint = Offset(rightEye.position.x * scaleX, rightEye.position.y * scaleY);
+      double centerX, centerY, width, rotation;
+
+      if (leftEye != null && rightEye != null) {
+        // Use landmarks for precise alignment
+        centerX = (leftEye.dx * scaleX + rightEye.dx * scaleX) / 2;
+        centerY = (leftEye.dy * scaleY + rightEye.dy * scaleY) / 2;
+        
+        // Width based on eye distance * multiplier
+        width = (rightEye.dx * scaleX - leftEye.dx * scaleX).abs() * 2.2 * _glassesSizeScale;
+        rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
+      } else {
+        // Fallback to bounding box
+        centerX = boundingBox.center.dx * scaleX;
+        centerY = boundingBox.top * scaleY + (boundingBox.height * 0.25 * scaleY);
+        width = boundingBox.width * scaleX * _glassesSizeScale;
+        rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
+      }
+
+      final height = width * 0.45;
+
+      // Simulate 3D rotation using Yaw (Y) and Pitch (X)
+      final yaw = (face.headEulerAngleY ?? 0); // Side to side
+      final pitch = (face.headEulerAngleX ?? 0); // Up and down
+
+      // Yaw affect horizontal scale (foreshortening)
+      double yawScale = (1.0 - (yaw.abs() / 100)).clamp(0.7, 1.0);
       
-      centerX = (leftPoint.dx + rightPoint.dx) / 2;
-      centerY = (leftPoint.dy + rightPoint.dy) / 2;
-      
-      // Width based on eye distance * multiplier
-      width = (rightPoint.dx - leftPoint.dx).abs() * 2.2 * _glassesSizeScale;
-      rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
-    } else {
-      // Fallback to bounding box
-      final rect = face.boundingBox;
-      centerX = rect.center.dx * scaleX;
-      centerY = rect.top * scaleY + (rect.height * 0.25 * scaleY);
-      width = rect.width * scaleX * _glassesSizeScale;
-      rotation = (face.headEulerAngleZ ?? 0) * (3.14159 / 180);
-    }
+      // Pitch affects vertical offset (perspective)
+      double pitchOffset = (pitch / 10) * (height / 4);
 
-    final height = width * 0.45;
-
-    // Simulate 3D rotation using Yaw (Y) and Pitch (X)
-    final yaw = (face.headEulerAngleY ?? 0); // Side to side
-    final pitch = (face.headEulerAngleX ?? 0); // Up and down
-
-    // Yaw affect horizontal scale (foreshortening)
-    double yawScale = (1.0 - (yaw.abs() / 100)).clamp(0.7, 1.0);
-    
-    // Pitch affects vertical offset (perspective)
-    double pitchOffset = (pitch / 10) * (height / 4);
-
-    return Positioned(
-      left: centerX - (width * yawScale / 2),
-      top: centerY - (height / 2) + pitchOffset,
-      width: width * yawScale,
-      height: height,
-      child: Transform(
-        alignment: Alignment.center,
-        transform: Matrix4.identity()
-          ..rotateZ(rotation)
-          ..rotateY(yaw * (3.14159 / 180) * 0.5) // Subtle 3D-like turn
-          ..rotateX(pitch * (3.14159 / 180) * 0.2), // Subtle tilt
-        child: Image.asset(
-          _getAssetForSelection(),
-          fit: BoxFit.contain,
-          opacity: const AlwaysStoppedAnimation(0.95),
+      return Positioned(
+        left: centerX - (width * yawScale / 2),
+        top: centerY - (height / 2) + pitchOffset,
+        width: width * yawScale,
+        height: height,
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..rotateZ(rotation)
+            ..rotateY(yaw * (3.14159 / 180) * 0.5) // Subtle 3D-like turn
+            ..rotateX(pitch * (3.14159 / 180) * 0.2), // Subtle tilt
+          child: Image.asset(
+            _getAssetForSelection(),
+            fit: BoxFit.contain,
+            opacity: const AlwaysStoppedAnimation(0.95),
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint("Overlay error: $e");
+      return const SizedBox.shrink();
+    }
   }
 
-  Widget _buildMockGlassesOverlay(Size viewportSize) {
-    final double width = 180.0 * _glassesSizeScale;
+  Widget _buildWebGlassesOverlay(Size viewportSize) {
+    if (_webFaceLandmarks == null || _selectedFrameIndex == -1) return const SizedBox.shrink();
+
+    final landmarks = _webFaceLandmarks!;
+    
+    // Normalized coordinates from MediaPipe
+    // Left eye (index 133 inner, 33 outer)
+    // Right eye (index 362 inner, 263 outer)
+    
+    final lInner = landmarks[133];
+    final lOuter = landmarks[33];
+    final rInner = landmarks[362];
+    final rOuter = landmarks[263];
+    final bridge = landmarks[168]; // Bridge between eyes
+
+    final double lx = ((lInner['x'] + lOuter['x']) / 2) * viewportSize.width;
+    final double ly = ((lInner['y'] + lOuter['y']) / 2) * viewportSize.height;
+    final double rx = ((rInner['x'] + rOuter['x']) / 2) * viewportSize.width;
+    final double ry = ((rInner['y'] + rOuter['y']) / 2) * viewportSize.height;
+    
+    final double centerX = (lx + rx) / 2;
+    final double centerY = (ly + ry) / 2;
+    
+    final double eyeDist = (rx - lx).abs();
+    final double width = eyeDist * 2.2 * _glassesSizeScale;
     final double height = width * 0.45;
     
-    // Use the tracked offset or default to center
-    final double centerX = (_mockGlassesOffset?.dx ?? (viewportSize.width / 2));
-    final double centerY = (_mockGlassesOffset?.dy ?? (viewportSize.height * 0.35));
+    // Rotation Z (Roll)
+    final double rotationZ = (ry - ly) / (rx - lx + 0.001);
 
-    // Dynamic tilt based on position relative to center
-    final double relativeX = (centerX - viewportSize.width / 2) / (viewportSize.width / 2);
-    final double rotationY = relativeX * 0.4; // Subtle 3D-like turn
+    // Estimation of Yaw (Y) and Pitch (X) from landmarks (simplified)
+    // Yaw: ratio of distance from bridge to each eye inner corner
+    final double distL = (lx - bridge['x'] * viewportSize.width).abs();
+    final double distR = (rx - bridge['x'] * viewportSize.width).abs();
+    final double yaw = (distR - distL) / (distR + distL + 0.001) * 1.5;
 
     return Positioned(
       left: centerX - (width / 2),
-      top: centerY - (height / 2), 
+      top: centerY - (height / 2),
       width: width,
       height: height,
       child: Transform(
         alignment: Alignment.center,
         transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // Perspective
-          ..rotateY(rotationY),
+          ..rotateZ(rotationZ)
+          ..rotateY(yaw.clamp(-0.8, 0.8)),
         child: Image.asset(
           _getAssetForSelection(),
           fit: BoxFit.contain,
@@ -545,32 +601,6 @@ class _VirtualTryOnPageState extends State<VirtualTryOnPage> {
     );
   }
 
-  // Position the Demo Mode label separately to avoid squashing
-  Widget _buildDemoModeLabel(bool isDesktop) {
-    return Positioned(
-      top: 12,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.black.withAlpha((0.5 * 255).round()),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Text(
-            isDesktop ? "Mode Démo (Bureau)" : "Mode Démo Web",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // Painters remain same for fallback

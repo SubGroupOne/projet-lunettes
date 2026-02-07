@@ -230,7 +230,9 @@ class _ProductsPageState extends State<ProductsPage>
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const VirtualTryOnPage(),
+                                builder: (_) => VirtualTryOnPage(
+                                  initialFrameAsset: p.tryOnAsset ?? p.image,
+                                ),
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
