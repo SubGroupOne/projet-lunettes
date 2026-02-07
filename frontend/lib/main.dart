@@ -244,6 +244,49 @@ class HomeScreen extends StatelessWidget {
 
   void _showAdminLogin(BuildContext context) {
     // Pour l'instant, navigation directe
+    // TODO: Implémenter l'authentification réelle
     Navigator.pushNamed(context, '/admin/dashboard');
+
+    /*
+    // Exemple de dialogue de connexion (à implémenter)
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Connexion Administrateur'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.email),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Mot de passe',
+                prefixIcon: Icon(Icons.lock),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/admin/dashboard');
+            },
+            child: const Text('Connexion'),
+          ),
+        ],
+      ),
+    );
+    */
   }
 }
