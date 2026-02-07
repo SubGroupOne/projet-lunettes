@@ -242,8 +242,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
                                     ),
                                   ),
                                   validator: (v) {
-                                    if (v == null || v.trim().isEmpty)
+                                    if (v == null || v.trim().isEmpty) {
                                       return 'Date invalide';
+                                    }
                                     return null;
                                   },
                                 ),
@@ -267,8 +268,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
                                     ),
                                   ),
                                   validator: (v) {
-                                    if (v == null || v.trim().length < 3)
+                                    if (v == null || v.trim().length < 3) {
                                       return 'CVC invalide';
+                                    }
                                     return null;
                                   },
                                 ),
@@ -303,8 +305,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().length < 7)
+                        if (v == null || v.trim().length < 7) {
                           return 'Numéro mobile invalide';
+                        }
                         return null;
                       },
                     ),
@@ -337,8 +340,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Adresse requise';
+                        }
                         return null;
                       },
                     ),
