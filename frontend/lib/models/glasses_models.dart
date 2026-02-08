@@ -35,7 +35,7 @@ class GlassesModel {
       name: json['name'] ?? '',
       brand: json['brand'] ?? '',
       category: json['category'] ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
+      price: double.tryParse(json['price']?.toString() ?? '0.0') ?? 0.0,
       color: json['color'] ?? '',
       material: json['material'] ?? '',
       images: List<String>.from(json['images'] ?? []),

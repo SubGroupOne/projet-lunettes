@@ -1,9 +1,10 @@
-name: optical_shop_admin
-description: Application d'administration pour la vente de verres correcteurs
+name: eyeglasses_shop
+description: "Application d'administration pour la vente de verres correcteurs"
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -13,7 +14,6 @@ dependencies:
   cupertino_icons: ^1.0.6
   animate_do: ^3.3.4
   flutter_staggered_animations: ^1.1.1
-
   smooth_page_indicator: ^1.1.0
   carousel_slider: ^5.0.0
 
@@ -27,16 +27,30 @@ dependencies:
 
   # Storage
   shared_preferences: ^2.2.2
-
-  # Charts & Statistics
-  fl_chart: ^0.66.0
-  syncfusion_flutter_charts: ^24.2.9
+  path_provider: ^2.1.2
 
   # Utils
   intl: ^0.19.0
   cached_network_image: ^3.3.1
   image_picker: ^1.0.7
   flutter_svg: ^2.0.9
+
+  # ML & AI
+  google_mlkit_text_recognition: ^0.11.0
+  google_mlkit_face_detection: ^0.9.0
+
+  # Camera & Permissions
+  camera: ^0.10.5
+  permission_handler: ^11.3.0
+
+  # Fonts
+  google_fonts: ^6.1.0
+
+  # Charts
+  fl_chart: ^0.66.2
+
+  # Timeline
+  timeline_tile: ^2.0.0
 
 dev_dependencies:
   flutter_test:

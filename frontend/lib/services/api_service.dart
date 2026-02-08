@@ -7,7 +7,7 @@ import '../models/glasses_models.dart';
 
 class ApiService {
   // À MODIFIER : Remplace par l'URL de l'API de tes collègues
-  static const String baseUrl = 'https://votre-api.com/api';
+  static const String baseUrl = 'http://localhost:3000';
 
   // Token d'authentification (à stocker de manière sécurisée)
   static String? _authToken;

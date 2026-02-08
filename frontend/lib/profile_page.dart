@@ -1,326 +1,270 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'order_tracking_page.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  final String accessToken;
+
+  const ProfilePage({super.key, required this.accessToken});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String userName = 'Chargement...';
+  String userEmail = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName') ?? 'Utilisateur';
+      userEmail = prefs.getString('userEmail') ?? 'email@exemple.com';
+    });
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Profil',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
+        title: Text('Mon Profil', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            // Avatar Section
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade200, width: 1),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://i.pravatar.cc/300',
-                        ), // Placeholder avatar
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 5,
-                    right: 5,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00B2FF),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Alexandre Bouda',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            const Text(
-              'Alexandrebouda@gmail.com',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-
-            // Compte et Optique Section
-            _buildSectionHeader('COMPTE ET OPTIQUE'),
-            _buildSettingsGroup([
-              _buildSettingsItem(
-                icon: Icons.assignment_outlined,
-                iconColor: Colors.orange.shade300,
-                title: 'Mes Ordonnances',
-                subtitle: 'Scans AI en cours',
-              ),
-              _buildSettingsItem(
-                icon: Icons.history,
-                iconColor: Colors.red.shade400,
-                title: 'Historique de Commandes',
-                subtitle: '2 commandes en cours',
-              ),
-              _buildSettingsItem(
-                icon: Icons.shield_outlined,
-                iconColor: Colors.green.shade400,
-                title: 'Mes Assurances',
-                subtitle: 'Mutuelle & Tiers Payant',
-                isLast: true,
-              ),
-            ]),
-
             const SizedBox(height: 24),
-
-            // Preferances Section
-            _buildSectionHeader('PREFERANCES'),
-            _buildSettingsGroup([
-              _buildSettingsItem(
-                icon: Icons.favorite,
-                iconColor: Colors.red.shade300,
-                title: 'Mes Favoris',
-                subtitle: '8 montures enregistrees',
-              ),
-              _buildSettingsItem(
-                icon: Icons.settings_outlined,
-                iconColor: Colors.grey.shade600,
-                title: 'Parametres',
-                subtitle: 'Notification, Securite, AI',
-                isLast: true,
-              ),
-            ]),
-
-            const SizedBox(height: 32),
-
-            // Action Buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00B2FF),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        "Centre d'Aide",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF231F25),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.logout, color: Colors.red, size: 20),
-                          SizedBox(width: 12),
-                          Text(
-                            "Deconnexion",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 100), // Space for Bottom Nav
+            _buildPremiumHeader(),
+            const SizedBox(height: 40),
+            _buildBentoSettingsGrid(),
+            const SizedBox(height: 48),
+            _buildLogoutButton(),
+            const SizedBox(height: 100),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: _buildModernNavBar(),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-            letterSpacing: 0.5,
+  Widget _buildPremiumHeader() {
+    return FadeInDown(
+      child: Center(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.2), width: 2),
+              ),
+              child: const CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage('https://i.pravatar.cc/300?u=vision'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(userName, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+            Text(userEmail, style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBentoSettingsGrid() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Ordonnances',
+                icon: Icons.assignment_rounded,
+                color: const Color(0xFF6366F1),
+                onTap: () {},
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Commandes',
+                icon: Icons.shopping_bag_rounded,
+                color: const Color(0xFF3B82F6),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => OrderTrackingPage(accessToken: widget.accessToken))),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Assurances',
+                icon: Icons.verified_user_rounded,
+                color: const Color(0xFF10B981),
+                onTap: () {},
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Favoris',
+                icon: Icons.favorite_rounded,
+                color: const Color(0xFFEF4444),
+                onTap: () {},
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildFullWidthBentoItem(
+          title: 'Paramètres du compte',
+          subtitle: 'Sécurité, Notifications, Confidentialité',
+          icon: Icons.settings_rounded,
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBentoItem({required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return FadeInUp(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 20),
+              Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF0F172A))),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSettingsGroup(List<Widget> items) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: const Color(
-          0xFFECF3F9,
-        ), // Light blueish grey background from image
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.05 * 255).round()),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildFullWidthBentoItem({required String title, required String subtitle, required IconData icon, required VoidCallback onTap}) {
+    return FadeInUp(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))],
           ),
-        ],
-      ),
-      child: Column(children: items),
-    );
-  }
-
-  Widget _buildSettingsItem({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    bool isLast = false,
-  }) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: iconColor, size: 24),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(16)),
+                child: const Icon(Icons.settings_rounded, color: Color(0xFF0F172A)),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF231F25),
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
+                    Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF0F172A))),
+                    Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
                   ],
                 ),
               ),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black26),
             ],
           ),
         ),
-        if (!isLast)
-          const Divider(
-            height: 1,
-            indent: 72,
-            endIndent: 0,
-            color: Colors.white,
-          ),
-      ],
+      ),
     );
   }
 
-  Widget _buildBottomNavBar() {
+  Widget _buildLogoutButton() {
+    return FadeInUp(
+      child: SizedBox(
+        width: double.infinity,
+        height: 64,
+        child: TextButton(
+          onPressed: _logout,
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0xFFEF4444).withOpacity(0.05),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 20),
+              const SizedBox(width: 12),
+              Text("SE DÉCONNECTER", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFEF4444), letterSpacing: 1)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernNavBar() {
     return Container(
+      padding: const EdgeInsets.only(top: 10, bottom: 30),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        border: Border(top: BorderSide(color: Colors.black.withOpacity(0.05))),
       ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF00B2FF),
-        unselectedItemColor: Colors.grey.shade400,
-        currentIndex: 3,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.document_scanner_outlined),
-            label: 'Ordonnance',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Commandes',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _navItem(Icons.home_max_rounded, "Accueil", false, 0),
+          _navItem(Icons.document_scanner_rounded, "Analyses", false, 1),
+          _navItem(Icons.shopping_bag_rounded, "Suivi", false, 2),
+          _navItem(Icons.person_rounded, "Moi", true, 3),
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(IconData icon, String label, bool isSelected, int index) {
+    return GestureDetector(
+      onTap: () {
+        if (index == 0) Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        if (index == 2) Navigator.push(context, MaterialPageRoute(builder: (_) => OrderTrackingPage(accessToken: widget.accessToken)));
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: isSelected ? const Color(0xFF6366F1) : Colors.black26),
+          const SizedBox(height: 4),
+          Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF6366F1) : Colors.black26)),
         ],
       ),
     );

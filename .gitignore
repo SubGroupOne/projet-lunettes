@@ -1,0 +1,239 @@
+# ========================
+# BACKEND (Node.js)
+# ========================
+
+# Dependencies
+backend/node_modules/
+backend/package-lock.json
+
+# Environment variables
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# Logs
+backend/logs/
+backend/*.log
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# PM2
+backend/.pm2/
+backend/pids/
+backend/*.pid
+backend/*.seed
+backend/*.pid.lock
+
+# Coverage
+backend/coverage/
+backend/.nyc_output/
+
+# IDE
+backend/.vscode/
+backend/.idea/
+backend/*.swp
+backend/*.swo
+backend/*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ========================
+# FRONTEND (Flutter)
+# ========================
+
+# Dart/Flutter
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/.pub-cache/
+frontend/.pub/
+frontend/build/
+frontend/flutter_*.png
+
+# Android
+frontend/android/app/debug/
+frontend/android/app/profile/
+frontend/android/app/release/
+frontend/android/.gradle/
+frontend/android/captures/
+frontend/android/local.properties
+frontend/android/**/GeneratedPluginRegistrant.java
+frontend/android/key.properties
+frontend/android/**/*.jks
+
+# iOS/XCode
+frontend/ios/Flutter/.last_build_id
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/app.flx
+frontend/ios/Flutter/app.zip
+frontend/ios/Flutter/flutter_assets/
+frontend/ios/Flutter/flutter_export_environment.sh
+frontend/ios/ServiceDefinitions.json
+frontend/ios/Runner/GeneratedPluginRegistrant.*
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/**/DerivedData/
+frontend/ios/**/*.mode1v3
+frontend/ios/**/*.mode2v3
+frontend/ios/**/*.moved-aside
+frontend/ios/**/*.pbxuser
+frontend/ios/**/*.perspectivev3
+frontend/ios/**/*sync/
+frontend/ios/**/.sconsign.dblite
+frontend/ios/**/.tags*
+frontend/ios/**/.vagrant/
+frontend/ios/**/xcuserdata/
+frontend/ios/*.ipa
+frontend/ios/*.dSYM.zip
+frontend/ios/*.dSYM
+
+# Web
+frontend/web/flutter_service_worker.js
+frontend/web/version.json
+
+# Linux
+frontend/linux/flutter/generated_plugin_registrant.cc
+frontend/linux/flutter/generated_plugin_registrant.h
+frontend/linux/flutter/generated_plugins.cmake
+
+# Windows
+frontend/windows/flutter/generated_plugin_registrant.cc
+frontend/windows/flutter/generated_plugin_registrant.h
+frontend/windows/flutter/generated_plugins.cmake
+
+# macOS
+frontend/macos/Flutter/GeneratedPluginRegistrant.swift
+frontend/macos/Flutter/Flutter-Debug.xcconfig
+frontend/macos/Flutter/Flutter-Release.xcconfig
+frontend/macos/Flutter/Flutter-Profile.xcconfig
+
+# Exceptions for Flutter
+!frontend/**/ios/**/default.mode1v3
+!frontend/**/ios/**/default.mode2v3
+!frontend/**/ios/**/default.pbxuser
+!frontend/**/ios/**/default.perspectivev3
+
+# ========================
+# DATABASE
+# ========================
+
+# Backups
+*.sql.gz
+*.sql.backup
+/var/backups/
+
+# Sensitive data
+backend/database/production-seeds.sql
+
+# ========================
+# DEPLOYMENT
+# ========================
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# CI/CD
+.github/workflows/*.local.yml
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# ========================
+# TEMPORARY FILES
+# ========================
+
+# Analysis (ajoutés à .gitignore comme recommandé)
+analysis_errors.txt
+analysis_output.txt
+final_analysis.txt
+build_out.txt
+*.log
+
+# Temp
+*.tmp
+*.temp
+*.cache
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# ========================
+# IDE & EDITORS
+# ========================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ========================
+# PROJECT SPECIFIC
+# ========================
+
+# Photos en développement (garder seulement les assets finaux)
+photos/*.jpeg
+photos/*.jpg
+photos/*.png
+!photos/assets/
+
+# Fichiers de configuration locaux
+config.local.js
+config.local.dart
+
+# Test data
+test-data/
+mock-data/
+
+# Documentation générée
+docs/build/
+*.pdf
+
+# Uploads utilisateur (ne pas commit en production)
+uploads/
+user-uploads/
+
+# ========================
+# SECURITY
+# ========================
+
+# SSH keys
+*.ssh/
+id_rsa*
+id_ed25519*
+
+# API Keys
+.apikeys
+secrets.json
+credentials.json

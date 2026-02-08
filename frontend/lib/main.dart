@@ -1,13 +1,20 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
-import 'screens/glasses_selection_screen.dart';
-import 'screens/admin/admin_dashboard_screen.dart';
-import 'screens/admin/users_management_screen.dart';
-import 'screens/admin/opticiens_management_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'services/cart.dart';
+import 'services/session_service.dart';
+import 'landing_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => Cart()),
+        ChangeNotifierProvider(create: (context) => SessionService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,277 +23,41 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Optical Shop Admin',
+      title: 'Smart Vision',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: const Color(0xFF2196F3),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2196F3),
-          brightness: Brightness.light,
-        ),
         useMaterial3: true,
-        fontFamily: 'Roboto',
-
-        // AppBar Theme
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6366F1),
+          primary: const Color(0xFF0F172A),
+          secondary: const Color(0xFF6366F1),
+          surface: const Color(0xFFF8FAFC),
+        ),
+        textTheme: GoogleFonts.interTextTheme(
+          Theme.of(context).textTheme,
+        ).copyWith(
+          displayLarge: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+          displayMedium: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+          titleLarge: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: const Color(0xFF0F172A)),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
         appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
           elevation: 0,
-          centerTitle: false,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          iconTheme: IconThemeData(color: Colors.black87),
+          centerTitle: true,
+          titleTextStyle: TextStyle(color: Color(0xFF0F172A), fontSize: 20, fontWeight: FontWeight.bold),
+          iconTheme: IconThemeData(color: Color(0xFF0F172A)),
         ),
-
-        // Card Theme
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-
-        // Button Themes
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-        ),
-
-        // Input Decoration Theme
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          filled: true,
-          fillColor: Colors.grey[100],
         ),
       ),
-
-      // Routes de navigation
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/glasses': (context) => const GlassesSelectionScreen(),
-        '/admin/dashboard': (context) => const AdminDashboardScreen(),
-        '/admin/users': (context) => const UsersManagementScreen(),
-        '/admin/opticiens': (context) => const OpticiensManagementScreen(),
-      },
+      home: const LandingPage(),
     );
   }
 }
 
-// Écran d'accueil pour choisir le mode (Client ou Admin)
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withOpacity(0.7),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo ou icône
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.remove_red_eye,
-                    size: 60,
-                    color: Color(0xFF2196F3),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                const Text(
-                  'Optical Shop',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  'Vente de verres correcteurs',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-
-                const SizedBox(height: 60),
-
-                // Bouton Mode Client
-                _buildModeCard(
-                  context,
-                  icon: Icons.shopping_bag,
-                  title: 'Mode Client',
-                  subtitle: 'Choisir et essayer des lunettes',
-                  color: Colors.green,
-                  onTap: () => Navigator.pushNamed(context, '/glasses'),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Bouton Mode Admin
-                _buildModeCard(
-                  context,
-                  icon: Icons.admin_panel_settings,
-                  title: 'Mode Administrateur',
-                  subtitle: 'Gérer le système',
-                  color: Colors.orange,
-                  onTap: () => _showAdminLogin(context),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModeCard(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required Color color,
-        required VoidCallback onTap,
-      }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: 300,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(icon, color: color, size: 32),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey[400]),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showAdminLogin(BuildContext context) {
-    // Pour l'instant, navigation directe
-    // TODO: Implémenter l'authentification réelle
-    Navigator.pushNamed(context, '/admin/dashboard');
-
-    /*
-    // Exemple de dialogue de connexion (à implémenter)
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Connexion Administrateur'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Mot de passe',
-                prefixIcon: Icon(Icons.lock),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/admin/dashboard');
-            },
-            child: const Text('Connexion'),
-          ),
-        ],
-      ),
-    );
-    */
-  }
-}

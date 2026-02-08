@@ -86,7 +86,7 @@ class OpticienModel {
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       isVerified: json['isVerified'] ?? false,
-      rating: (json['rating'] ?? 0.0).toDouble(),
+      rating: double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0,
       totalOrders: json['totalOrders'] ?? 0,
       joinedDate: DateTime.parse(json['joinedDate'] ?? DateTime.now().toString()),
       logo: json['logo'],
@@ -136,8 +136,8 @@ class InsuranceModel {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       code: json['code'] ?? '',
-      coveragePercentage: (json['coveragePercentage'] ?? 0.0).toDouble(),
-      maxCoverage: (json['maxCoverage'] ?? 0.0).toDouble(),
+      coveragePercentage: double.tryParse(json['coveragePercentage']?.toString() ?? '0.0') ?? 0.0,
+      maxCoverage: double.tryParse(json['maxCoverage']?.toString() ?? '0.0') ?? 0.0,
       isActive: json['isActive'] ?? true,
       logo: json['logo'],
     );
@@ -184,7 +184,7 @@ class StatisticsModel {
       totalUsers: json['totalUsers'] ?? 0,
       totalOpticiens: json['totalOpticiens'] ?? 0,
       totalOrders: json['totalOrders'] ?? 0,
-      totalRevenue: (json['totalRevenue'] ?? 0.0).toDouble(),
+      totalRevenue: double.tryParse(json['totalRevenue']?.toString() ?? '0.0') ?? 0.0,
       pendingOrders: json['pendingOrders'] ?? 0,
       completedOrders: json['completedOrders'] ?? 0,
       monthlyRevenue: (json['monthlyRevenue'] as List? ?? [])
@@ -206,7 +206,7 @@ class MonthlyData {
   factory MonthlyData.fromJson(Map<String, dynamic> json) {
     return MonthlyData(
       month: json['month'] ?? '',
-      revenue: (json['revenue'] ?? 0.0).toDouble(),
+      revenue: double.tryParse(json['revenue']?.toString() ?? '0.0') ?? 0.0,
     );
   }
 }
