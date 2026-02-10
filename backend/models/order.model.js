@@ -29,11 +29,11 @@ exports.updateOrderStatus = async (id, status) => {
   await db.execute(sql, [status, id]);
 };
 
-exports.createOrder = async (userId, frameId, prescriptionData, insuranceData, totalPrice) => {
+exports.createOrder = async (userId, frameId, frameName, prescriptionData, insuranceData, totalPrice) => {
   const sql = `
-    INSERT INTO orders (user_id, frame_id, prescription_data, insurance_data, total_price, status)
-    VALUES (?, ?, ?, ?, ?, 'pending')
+    INSERT INTO orders (user_id, frame_id, frame_name, prescription_data, insurance_data, total_price, status)
+    VALUES (?, ?, ?, ?, ?, ?, 'pending')
   `;
-  const [result] = await db.execute(sql, [userId, frameId, JSON.stringify(prescriptionData), JSON.stringify(insuranceData), totalPrice]);
+  const [result] = await db.execute(sql, [userId, frameId, frameName, prescriptionData, insuranceData, totalPrice]);
   return result.insertId;
 };

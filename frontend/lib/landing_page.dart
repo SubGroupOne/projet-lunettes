@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'services/session_service.dart';
 import 'profile_page.dart';
 import 'services/cart.dart';
+import 'screens/catalog_screen.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -138,7 +139,16 @@ class _LandingPageState extends State<LandingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('NOS MODÈLES', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 2)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('NOS MODÈLES', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: 2)),
+              TextButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CatalogScreen())),
+                child: Text('VOIR TOUT', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF6366F1))),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           SizedBox(
             height: 40,
@@ -318,21 +328,34 @@ class _LandingPageState extends State<LandingPage> {
           const SizedBox(height: 32),
           FadeInUp(
             delay: const Duration(milliseconds: 300),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VirtualTryOnScreen())),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
-                    child: const Text('ESSAYER EN 3D'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VirtualTryOnScreen())),
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1), foregroundColor: Colors.white),
+                        child: const Text('ESSAYER EN 3D'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CatalogScreen())),
+                        style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), padding: const EdgeInsets.symmetric(vertical: 16)),
+                        child: const Text('PARCOURIR'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrescriptionScanScreen())),
-                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white24), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), padding: const EdgeInsets.symmetric(vertical: 16)),
-                    child: const Text('SCAN IA'),
+                    icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white60, size: 18),
+                    label: Text('SCANNER MON ORDONNANCE', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],

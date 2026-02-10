@@ -23,19 +23,29 @@ exports.getOrderDetails = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
     try {
-        const { frameId, prescriptionData, insuranceData, totalPrice } = req.body;
+        const { frameId, frameName, prescriptionData, insuranceData, totalPrice } = req.body;
         // req.user est peuplé par authMiddleware qui décode le token
         const userId = req.user.id || req.user.userId;
-        const userEmail = req.user.email; // Assurez-vous que le token contient l'email
+        const userEmail = req.user.email;
         const userName = req.user.name || 'Client';
 
-        if (!frameId || !totalPrice) {
-            return res.status(400).json({ message: 'Monture et prix requis' });
+        if ((!frameId && !frameName) || !totalPrice) {
+            return res.status(400).json({ message: 'Monture (ID ou Nom) et prix requis' });
+        }
+
+        // Si frameId est une chaîne non numérique (comme le nom du produit), on l'utilise comme frameName SI frameName n'est pas fourni
+        let finalFrameId = parseInt(frameId);
+        let finalFrameName = frameName;
+
+        if (isNaN(finalFrameId)) {
+            finalFrameId = null;
+            if (!finalFrameName) finalFrameName = frameId; // Fallback au nom si l'ID est une string
         }
 
         const orderId = await Order.createOrder(
             userId,
-            frameId,
+            finalFrameId,
+            finalFrameName,
             JSON.stringify(prescriptionData || {}),
             JSON.stringify(insuranceData || {}),
             totalPrice
