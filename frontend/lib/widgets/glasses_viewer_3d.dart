@@ -1,6 +1,7 @@
 // lib/widgets/glasses_viewer_3d.dart
 
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'dart:math' as math;
 import '../models/glasses_models.dart';
 
@@ -9,10 +10,10 @@ class GlassesViewer3D extends StatefulWidget {
   final VoidCallback? onTap;
 
   const GlassesViewer3D({
-    Key? key,
+    super.key,
     required this.glasses,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<GlassesViewer3D> createState() => _GlassesViewer3DState();
@@ -22,7 +23,7 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   double _rotationY = 0.0;
-  double _scale = 1.0;
+  final double _scale = 1.0;
   int _currentImageIndex = 0;
 
   @override
@@ -67,14 +68,14 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001) // Perspective
               ..rotateY(_rotationY + autoRotation * 0.1)
-              ..scale(_scale),
+              ..scaleByVector3(Vector3(_scale, _scale, 1.0)),
             alignment: Alignment.center,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                     offset: Offset(
@@ -95,11 +96,11 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            Colors.white.withOpacity(0.8),
-                            Colors.white.withOpacity(0.5),
-                            Colors.white.withOpacity(0.8),
+                            Colors.white.withValues(alpha: 0.8),
+                            Colors.white.withValues(alpha: 0.5),
+                            Colors.white.withValues(alpha: 0.8),
                           ],
-                          stops: [0.0, 0.5, 1.0],
+                          stops: const [0.0, 0.5, 1.0],
                           transform: GradientRotation(_controller.value * 2 * math.pi),
                         ).createShader(bounds);
                       },
@@ -130,7 +131,7 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.3),
+                              Colors.black.withValues(alpha: 0.3),
                             ],
                           ),
                         ),
@@ -150,7 +151,7 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.8),
+                              Colors.black.withValues(alpha: 0.8),
                             ],
                           ),
                         ),
@@ -173,7 +174,7 @@ class _GlassesViewer3DState extends State<GlassesViewer3D>
                                 Text(
                                   widget.glasses.brand,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     fontSize: 14,
                                   ),
                                 ),

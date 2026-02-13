@@ -15,10 +15,10 @@ class PaymentConfirmationPage extends StatefulWidget {
   final String accessToken;
 
   const PaymentConfirmationPage({
-    Key? key,
+    super.key,
     required this.totalAmount,
     required this.accessToken,
-  }) : super(key: key);
+  });
 
   @override
   State<PaymentConfirmationPage> createState() => _PaymentConfirmationPageState();
@@ -136,6 +136,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
         throw Exception('Erreur serveur (${response.statusCode})');
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
@@ -326,7 +327,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: isSelected ? const Color(0xFF6366F1).withOpacity(0.1) : const Color(0xFFF1F5F9), shape: BoxShape.circle), child: Icon(icon, color: isSelected ? const Color(0xFF6366F1) : Colors.grey, size: 20)),
+            Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: isSelected ? const Color(0xFF6366F1).withValues(alpha: 0.1) : const Color(0xFFF1F5F9), shape: BoxShape.circle), child: Icon(icon, color: isSelected ? const Color(0xFF6366F1) : Colors.grey, size: 20)),
             const SizedBox(width: 16),
             Expanded(child: Text(title, style: GoogleFonts.inter(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 14))),
             if (isSelected) const Icon(Icons.check_circle_rounded, color: Color(0xFF6366F1), size: 20),
@@ -343,7 +344,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage> {
       duration: const Duration(milliseconds: 300),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.2))),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.2))),
         child: Column(
           children: [
             if (_paymentMethod == PaymentMethod.card) ...[

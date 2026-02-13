@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 import 'services/session_service.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -44,31 +44,58 @@ class _LoginPageState extends State<LoginPage> {
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
+        if (!mounted) return;
+        final session = Provider.of<SessionService>(context, listen: false);
+        
+        // 🚀 Mise à jour centralisée de la session
+        await session.updateSession(
+          token: data['accessToken'],
+          name: data['user']['name'],
+          email: data['user']['email'] ?? _emailController.text,
+          id: data['user']['id'],
+        );
+
+        // Optionnel : sauvegarde supplémentaire si nécessaire (déjà fait dans updateSession)
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', data['accessToken']);
         await prefs.setString('refreshToken', data['refreshToken']);
         await prefs.setString('userRole', data['user']['role']);
-        await prefs.setInt('userId', data['user']['id']);
-        await prefs.setString('userName', data['user']['name']);
-        await prefs.setString('userEmail', data['user']['email'] ?? _emailController.text);
 
         if (!mounted) return;
 
         // 🚀 Fusion des données Guest -> User
-        await Provider.of<SessionService>(context, listen: false).mergeGuestData(data['user']['id']);
+        await session.mergeGuestData(data['user']['id']);
+
+        if (!mounted) return;
 
         final role = data['user']['role'];
         if (role == 'admin') {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminDashboardPage(accessToken: data['accessToken'])));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminDashboardPage(accessToken: data['accessToken']),
+            ),
+          );
         } else if (role == 'opticien') {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => OpticianDashboardPage(accessToken: data['accessToken'])));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OpticianDashboardPage(accessToken: data['accessToken']),
+            ),
+          );
         } else {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfilePage(accessToken: data['accessToken'])));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePage(accessToken: data['accessToken']),
+            ),
+          );
         }
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Échec de la connexion')));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur réseau : $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -192,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            prefixIcon: Icon(icon, size: 20, color: const Color(0xFF0F172A).withOpacity(0.5)),
+            prefixIcon: Icon(icon, size: 20, color: const Color(0xFF0F172A).withValues(alpha: 0.5)),
             suffixIcon: isPassword 
               ? IconButton(icon: Icon(obscureText ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 20), onPressed: onToggleVisibility)
               : null,

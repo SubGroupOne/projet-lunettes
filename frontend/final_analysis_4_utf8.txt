@@ -1,0 +1,46 @@
+﻿Resolving dependencies...
+Downloading packages...
+  animate_do 3.3.9 (4.2.0 available)
+  camera 0.10.6 (0.11.3+1 available)
+! carousel_slider 5.0.0 (overridden) (5.1.2 available)
+  characters 1.4.0 (1.4.1 available)
+  ffi 2.1.5 (2.2.0 available)
+  fl_chart 0.66.2 (1.1.1 available)
+  flutter_lints 3.0.2 (6.0.0 available)
+  google_fonts 6.3.3 (8.0.1 available)
+  google_mlkit_commons 0.6.1 (0.11.1 available)
+  google_mlkit_face_detection 0.9.0 (0.13.2 available)
+  google_mlkit_text_recognition 0.11.0 (0.15.1 available)
+  intl 0.19.0 (0.20.2 available)
+  lints 3.0.0 (6.1.0 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.1 available)
+  permission_handler 11.4.0 (12.0.1 available)
+  permission_handler_android 12.1.0 (13.0.1 available)
+  smooth_page_indicator 1.2.1 (2.0.1 available)
+  source_span 1.10.1 (1.10.2 available)
+  test_api 0.7.7 (0.7.9 available)
+Got dependencies!
+21 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing frontend...                                           
+
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\insurance_management_page.dart:158:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\insurance_management_page.dart:165:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\insurance_management_page.dart:184:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\insurance_management_page.dart:229:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\insurance_management_page.dart:236:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\user_management_page.dart:69:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\user_management_page.dart:77:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\user_management_page.dart:147:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\admin\user_management_page.dart:155:28 - use_build_context_synchronously
+   info - The imported package 'vector_math' isn't a dependency of the importing package - lib\widgets\glasses_viewer_3d.dart:4:8 - depend_on_referenced_packages
+
+flutter : 10 issues found. (ran in 1.9s)
+At line:1 char:1
++ flutter analyze > final_analysis_4.txt 2>&1 ; Get-Content -Path final ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (10 issues found. (ran in 1.9s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

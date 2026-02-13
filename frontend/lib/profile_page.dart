@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.2), width: 2),
+                border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.2), width: 2),
               ),
               child: const CircleAvatar(
                 radius: 50,
@@ -155,14 +155,14 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10))],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                 child: Icon(icon, color: color, size: 24),
               ),
               const SizedBox(height: 20),
@@ -183,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10))],
           ),
           child: Row(
             children: [
@@ -218,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: TextButton(
           onPressed: _logout,
           style: TextButton.styleFrom(
-            backgroundColor: const Color(0xFFEF4444).withOpacity(0.05),
+            backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.05),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
           child: Row(
@@ -239,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.only(top: 10, bottom: 30),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black.withOpacity(0.05))),
+        border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -1,12 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class InsuranceSimulationScreen extends StatefulWidget {
-  const InsuranceSimulationScreen({Key? key}) : super(key: key);
+  const InsuranceSimulationScreen({super.key});
 
   @override
   State<InsuranceSimulationScreen> createState() => _InsuranceSimulationScreenState();
@@ -81,9 +78,9 @@ class _InsuranceSimulationScreenState extends State<InsuranceSimulationScreen> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF6366F1).withOpacity(0.05),
+          color: const Color(0xFF6366F1).withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.1)),
+          border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.1)),
         ),
         child: Row(
           children: [
@@ -135,7 +132,7 @@ class _InsuranceSimulationScreenState extends State<InsuranceSimulationScreen> {
           color: const Color(0xFF0F172A),
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.1), blurRadius: 30, offset: const Offset(0, 15)),
+            BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.1), blurRadius: 30, offset: const Offset(0, 15)),
           ],
         ),
         child: Column(
@@ -152,7 +149,7 @@ class _InsuranceSimulationScreenState extends State<InsuranceSimulationScreen> {
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -217,7 +214,7 @@ class _InsuranceSimulationScreenState extends State<InsuranceSimulationScreen> {
         Text(label, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: _selectedInsurance,
+          initialValue: _selectedInsurance,
           onChanged: (v) => setState(() => _selectedInsurance = v),
           items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: GoogleFonts.inter()))).toList(),
           decoration: InputDecoration(

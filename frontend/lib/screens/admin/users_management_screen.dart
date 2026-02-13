@@ -6,7 +6,7 @@ import '../../models/models.dart';
 import '../../services/api_service.dart';
 
 class UsersManagementScreen extends StatefulWidget {
-  const UsersManagementScreen({Key? key}) : super(key: key);
+  const UsersManagementScreen({super.key});
 
   @override
   State<UsersManagementScreen> createState() => _UsersManagementScreenState();
@@ -179,7 +179,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -188,7 +188,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: roleColors[user.role]?.withOpacity(0.1),
+          backgroundColor: roleColors[user.role]?.withValues(alpha: 0.1),
           child: Text(
             user.name.substring(0, 1).toUpperCase(),
             style: TextStyle(
@@ -214,7 +214,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: roleColors[user.role]?.withOpacity(0.1),
+                    color: roleColors[user.role]?.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -231,8 +231,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: user.isActive
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

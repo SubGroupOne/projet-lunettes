@@ -6,7 +6,7 @@ import '../models/glasses_models.dart';
 import '../services/api_service.dart';
 
 class GlassesSelectionScreen extends StatefulWidget {
-  const GlassesSelectionScreen({Key? key}) : super(key: key);
+  const GlassesSelectionScreen({super.key});
 
   @override
   State<GlassesSelectionScreen> createState() => _GlassesSelectionScreenState();
@@ -70,7 +70,7 @@ class _GlassesSelectionScreenState extends State<GlassesSelectionScreen> with Si
       expandedHeight: 120.0,
       floating: true,
       pinned: true,
-      backgroundColor: const Color(0xFFF8FAFC).withOpacity(0.8),
+      backgroundColor: const Color(0xFFF8FAFC).withValues(alpha: 0.8),
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -109,7 +109,7 @@ class _GlassesSelectionScreenState extends State<GlassesSelectionScreen> with Si
               decoration: BoxDecoration(
                 color: isSelected ? const Color(0xFF0F172A) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))] : [],
+                boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))] : [],
               ),
               alignment: Alignment.center,
               child: Text(
@@ -163,7 +163,7 @@ class _GlassesSelectionScreenState extends State<GlassesSelectionScreen> with Si
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Stack(
@@ -232,7 +232,7 @@ class _GlassesSelectionScreenState extends State<GlassesSelectionScreen> with Si
 class ProductDetailScreen extends StatelessWidget {
   final GlassesModel glasses;
 
-  const ProductDetailScreen({Key? key, required this.glasses}) : super(key: key);
+  const ProductDetailScreen({super.key, required this.glasses});
 
   @override
   Widget build(BuildContext context) {
@@ -333,7 +333,7 @@ class ProductDetailScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               border: const Border(top: BorderSide(color: Colors.black12)),
             ),
             child: Row(

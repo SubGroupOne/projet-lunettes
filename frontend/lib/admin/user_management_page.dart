@@ -5,7 +5,7 @@ import 'dart:convert';
 class UserManagementPage extends StatefulWidget {
   final String accessToken;
 
-  const UserManagementPage({Key? key, required this.accessToken}) : super(key: key);
+  const UserManagementPage({super.key, required this.accessToken});
 
   @override
   State<UserManagementPage> createState() => _UserManagementPageState();
@@ -65,6 +65,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Rôle mis à jour avec succès ✅')),
         );
@@ -91,6 +92,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isActive ? 'Utilisateur désactivé ❌' : 'Utilisateur activé ✅'),
@@ -101,6 +103,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
         throw Exception('Erreur: ${response.statusCode}');
       }
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
@@ -140,6 +143,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Utilisateur supprimé ✅')),
         );
@@ -320,9 +324,9 @@ class _UserManagementPageState extends State<UserManagementPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -353,7 +357,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: color, width: 1.5),
         ),

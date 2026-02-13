@@ -5,7 +5,7 @@ import 'dart:convert';
 class OpticianManagementPage extends StatefulWidget {
   final String accessToken;
 
-  const OpticianManagementPage({Key? key, required this.accessToken}) : super(key: key);
+  const OpticianManagementPage({super.key, required this.accessToken});
 
   @override
   State<OpticianManagementPage> createState() => _OpticianManagementPageState();
@@ -42,7 +42,7 @@ class _OpticianManagementPageState extends State<OpticianManagementPage> {
         });
       }
     } catch (e) {
-      print('Error loading opticians: $e');
+      debugPrint('Error loading opticians: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -59,6 +59,7 @@ class _OpticianManagementPageState extends State<OpticianManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isActive ? 'Opticien désactivé ❌' : 'Opticien activé ✅'),
@@ -67,6 +68,7 @@ class _OpticianManagementPageState extends State<OpticianManagementPage> {
         _loadOpticians();
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );

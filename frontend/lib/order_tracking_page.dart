@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:intl/intl.dart';
 
 class OrderTrackingPage extends StatefulWidget {
@@ -8,10 +6,10 @@ class OrderTrackingPage extends StatefulWidget {
   final int? orderId;
 
   const OrderTrackingPage({
-    Key? key,
+    super.key,
     required this.accessToken,
     this.orderId,
-  }) : super(key: key);
+  });
 
   @override
   State<OrderTrackingPage> createState() => _OrderTrackingPageState();
@@ -248,7 +246,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.3),
+            color: Colors.deepPurple.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -477,7 +475,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         vertical: isLarge ? 8 : 5,
       ),
       decoration: BoxDecoration(
-        color: isLarge ? Colors.white : color.withOpacity(0.2),
+        color: isLarge ? Colors.white : color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color, width: isLarge ? 2 : 1),
       ),

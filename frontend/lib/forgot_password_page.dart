@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({Key? key}) : super(key: key);
+  const ForgotPasswordPage({super.key});
 
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
@@ -28,6 +28,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
       // On affiche toujours succès pour la sécurité sauf si erreur 500
       if (response.statusCode == 200 || response.statusCode == 404) {
+        if (!mounted) return;
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -42,13 +43,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
             ],
           ),
-        ).then((_) => Navigator.pop(context)); // Retour login
+        ).then((_) {
+          if (!mounted) return;
+          Navigator.pop(context);
+        }); // Retour login
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erreur lors de l\'envoi')),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e')),
       );

@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 class NotificationService {
   final String baseUrl = 'http://localhost:3000';
@@ -22,7 +23,7 @@ class NotificationService {
         throw Exception('Erreur lors de la récupération des notifications');
       }
     } catch (e) {
-      print('Error fetching notifications: $e');
+      debugPrint('Error fetching notifications: $e');
       return [];
     }
   }
@@ -40,7 +41,7 @@ class NotificationService {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
       return false;
     }
   }

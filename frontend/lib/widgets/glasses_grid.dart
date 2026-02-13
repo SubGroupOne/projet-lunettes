@@ -9,10 +9,10 @@ class GlassesGrid extends StatefulWidget {
   final Function(GlassesModel)? onGlassesSelected;
 
   const GlassesGrid({
-    Key? key,
+    super.key,
     required this.glassesList,
     this.onGlassesSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<GlassesGrid> createState() => _GlassesGridState();
@@ -189,8 +189,8 @@ class _GlassesCardState extends State<_GlassesCard>
                 boxShadow: [
                   BoxShadow(
                     color: _isHovered
-                        ? Theme.of(context).primaryColor.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.1),
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.1),
                     blurRadius: _isHovered ? 20 : 10,
                     spreadRadius: _isHovered ? 2 : 0,
                     offset: const Offset(0, 5),
@@ -255,7 +255,7 @@ class _GlassesCardState extends State<_GlassesCard>
                                 borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(20),
                                 ),
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                               ),
                               child: const Center(
                                 child: Icon(
@@ -310,7 +310,7 @@ class _GlassesCardState extends State<_GlassesCard>
                             Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(

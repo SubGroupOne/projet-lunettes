@@ -6,7 +6,7 @@ import '../../models/models.dart';
 import '../../services/api_service.dart';
 
 class OpticiensManagementScreen extends StatefulWidget {
-  const OpticiensManagementScreen({Key? key}) : super(key: key);
+  const OpticiensManagementScreen({super.key});
 
   @override
   State<OpticiensManagementScreen> createState() => _OpticiensManagementScreenState();
@@ -163,7 +163,7 @@ class _OpticiensManagementScreenState extends State<OpticiensManagementScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -171,7 +171,7 @@ class _OpticiensManagementScreenState extends State<OpticiensManagementScreen> {
       ),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green.withOpacity(0.1),
+          backgroundColor: Colors.green.withValues(alpha: 0.1),
           child: const Icon(Icons.store, color: Colors.green),
         ),
         title: Row(

@@ -3,18 +3,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'login_page.dart';
-import 'register_page.dart';
 import 'screens/virtual_try_on_screen.dart';
 import 'screens/prescription_scan_screen.dart';
 import 'screens/insurance_simulation_screen.dart';
 import 'package:provider/provider.dart';
 import 'services/session_service.dart';
-import 'profile_page.dart';
 import 'services/cart.dart';
 import 'screens/catalog_screen.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key}) : super(key: key);
+  const LandingPage({super.key});
 
   @override
   State<LandingPage> createState() => _LandingPageState();
@@ -98,9 +96,9 @@ class _LandingPageState extends State<LandingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _processStep('1', 'Essayer', 'Réalité Augmentée'),
-              _processStep('2', 'Scanner', 'Ordonnance IA'),
-              _processStep('3', 'Commander', 'Chez vous en 48h'),
+              _processStep('1', 'Essayer', 'Réalité Augmentée', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VirtualTryOnScreen()))),
+              _processStep('2', 'Scanner', 'Ordonnance IA', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrescriptionScanScreen()))),
+              _processStep('3', 'Commander', 'Chez vous en 48h', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CatalogScreen()))),
             ],
           ),
         ],
@@ -108,26 +106,33 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  Widget _processStep(String num, String title, String sub) {
+  Widget _processStep(String num, String title, String sub, {VoidCallback? onTap}) {
     return Expanded(
-      child: Column(
-        children: [
-          Container(
-            height: 40, width: 40,
-            decoration: BoxDecoration(color: const Color(0xFF0F172A), shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: Text(num, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: [
+              Container(
+                height: 40, width: 40,
+                decoration: const BoxDecoration(color: Color(0xFF0F172A), shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Text(num, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 12),
+              Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(sub, style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[500]), textAlign: TextAlign.center),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
-          Text(sub, style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[500]), textAlign: TextAlign.center),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildCatalogGridWithFilters() {
-    final List<Map<String, String>> _catalog = [
+    final List<Map<String, String>> catalog = [
       {'name': 'Onyx Pro', 'brand': 'Gunnar', 'image': 'assets/glasses/image.jpeg', 'price': '95 €'},
       {'name': 'Luxury Panther', 'brand': 'Cartier', 'image': 'assets/glasses/image2.jpg', 'price': '750 €'},
       {'name': 'Metal Minimal', 'brand': 'Prada', 'image': 'assets/glasses/image4.jpg', 'price': '220 €'},
@@ -166,7 +171,7 @@ class _LandingPageState extends State<LandingPage> {
                     onSelected: (val) => setState(() => _activeFilter = f),
                     backgroundColor: Colors.white,
                     selectedColor: const Color(0xFF0F172A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.withOpacity(0.2))),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.withValues(alpha: 0.2))),
                     showCheckmark: false,
                   ),
                 );
@@ -180,13 +185,13 @@ class _LandingPageState extends State<LandingPage> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.8,
             ),
-            itemCount: _catalog.length,
+            itemCount: catalog.length,
             itemBuilder: (context, index) {
-              final item = _catalog[index];
+              final item = catalog[index];
               return FadeInUp(
                 delay: Duration(milliseconds: index * 100),
                 child: Container(
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 5))]),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 5))]),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -254,7 +259,7 @@ class _LandingPageState extends State<LandingPage> {
   Widget _socialIcon(IconData icon) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), shape: BoxShape.circle),
       child: Icon(icon, color: Colors.white, size: 18),
     );
   }
@@ -297,7 +302,7 @@ class _LandingPageState extends State<LandingPage> {
                       children: [
                         IconButton(onPressed: () {}, icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 22)),
                         if (cart.itemCount > 0)
-                          Positioned(right: 8, top: 8, child: Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: const Color(0xFF6366F1), shape: BoxShape.circle), child: Text(cart.itemCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)))),
+                          Positioned(right: 8, top: 8, child: Container(padding: const EdgeInsets.all(4), decoration: const BoxDecoration(color: Color(0xFF6366F1), shape: BoxShape.circle), child: Text(cart.itemCount.toString(), style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)))),
                       ],
                     ),
                   ),
@@ -307,7 +312,7 @@ class _LandingPageState extends State<LandingPage> {
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
                       child: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), shape: BoxShape.circle),
                         child: Icon(session.isLoggedIn ? Icons.account_circle_rounded : Icons.person_outline_rounded, color: Colors.white, size: 20),
                       ),
                     ),
@@ -413,11 +418,11 @@ class _LandingPageState extends State<LandingPage> {
         onTap: onTap,
         child: Container(
           height: height, width: double.infinity, padding: EdgeInsets.all(compact ? 12 : 20),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))]),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10))]),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: compact ? 20 : 28)),
+              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: compact ? 20 : 28)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -447,7 +452,7 @@ class _LandingPageState extends State<LandingPage> {
           items: _featuredGlasses.map((glasses) {
             return Builder(builder: (context) => Container(
               margin: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(32), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 30, offset: const Offset(0, 15))]),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(32), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 30, offset: const Offset(0, 15))]),
               child: Column(
                 children: [
                   Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(32)), child: Image.asset(glasses['image']!, fit: BoxFit.cover, width: double.infinity))),

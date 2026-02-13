@@ -10,7 +10,7 @@ import '../payment_confirmation_page.dart';
 import '../login_page.dart';
 
 class CatalogScreen extends StatefulWidget {
-  const CatalogScreen({Key? key}) : super(key: key);
+  const CatalogScreen({super.key});
 
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
@@ -124,7 +124,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
                 ),
                 child: ElevatedButton(
                   onPressed: () => _navigateToPayment(context),
@@ -207,7 +207,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 20,
             offset: const Offset(0, 5),
           )
@@ -317,7 +317,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const VirtualTryOnScreen()),
+                        MaterialPageRoute(builder: (_) => VirtualTryOnScreen(initialTryOnAsset: product.tryOnAsset)),
                       );
                     },
                     style: OutlinedButton.styleFrom(

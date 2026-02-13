@@ -8,7 +8,7 @@ class PaymentService {
     await Future.delayed(const Duration(seconds: 2));
 
     // Simuler un succès à 95%
-    bool success = true; // Pour les tests, on met true par défaut
+    bool success = DateTime.now().millisecond % 100 < 95;
 
     if (success) {
       return {

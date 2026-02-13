@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class VirtualTryOnScreen extends StatefulWidget {
-  const VirtualTryOnScreen({Key? key}) : super(key: key);
+  final String? initialTryOnAsset;
+  const VirtualTryOnScreen({super.key, this.initialTryOnAsset});
 
   @override
   State<VirtualTryOnScreen> createState() => _VirtualTryOnScreenState();
@@ -16,6 +18,11 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
   bool _isCameraInitialized = false;
   late AnimationController _scanController;
   int _selectedGlassesIndex = 0;
+  Offset _offset = Offset.zero;
+  double _scale = 1.0;
+  double _baseScale = 1.0;
+  bool _cameraError = false;
+  bool _isScanningComplete = false;
 
   final List<Map<String, String>> _glasses = [
     {'name': 'Aviator', 'image': 'assets/glasses/image.jpeg'},
@@ -27,25 +34,76 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    if (widget.initialTryOnAsset != null) {
+      final index = _glasses.indexWhere((g) => g['image'] == widget.initialTryOnAsset);
+      if (index != -1) {
+        _selectedGlassesIndex = index;
+      } else {
+        _glasses.insert(0, {
+          'name': 'Sélection',
+          'image': widget.initialTryOnAsset!,
+        });
+        _selectedGlassesIndex = 0;
+      }
+    }
+    
     _scanController = AnimationController(
       duration: const Duration(seconds: 4),
       vsync: this,
-    )..repeat();
+    );
+
+    _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
+    if (mounted) {
+      setState(() {
+        _cameraError = false;
+        _isCameraInitialized = false;
+        _isScanningComplete = false;
+        _scanController.repeat();
+      });
+    }
 
-    _controller = CameraController(cameras[0], ResolutionPreset.high);
+    // Demander la permission explicitement
+    var status = await Permission.camera.request();
+    if (!status.isGranted) {
+      if (mounted) setState(() => _cameraError = true);
+      _startScanningSimulation();
+      return;
+    }
+
     try {
-      await _controller!.initialize();
+      final cameras = await availableCameras().timeout(const Duration(seconds: 5));
+      if (cameras.isEmpty) {
+        if (mounted) setState(() => _cameraError = true);
+        _startScanningSimulation();
+        return;
+      }
+
+      _controller = CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
+      await _controller!.initialize().timeout(const Duration(seconds: 10));
+      
       if (!mounted) return;
       setState(() => _isCameraInitialized = true);
+      _startScanningSimulation();
     } catch (e) {
       debugPrint("Camera error: $e");
+      if (mounted) setState(() => _cameraError = true);
+      _startScanningSimulation();
     }
+  }
+
+  void _startScanningSimulation() {
+    // Simuler la fin du scan après 3 secondes, peu importe l'état de la caméra
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _isScanningComplete = true;
+          _scanController.stop();
+        });
+      }
+    });
   }
 
   @override
@@ -72,8 +130,48 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
                 child: CameraPreview(_controller!),
               ),
             )
+          else if (_cameraError)
+            Container(
+              color: const Color(0xFF0F172A),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.videocam_off_rounded, color: Colors.white54, size: 64),
+                    const SizedBox(height: 24),
+                    Text(
+                      "Caméra non détectée",
+                      style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        "Vous pouvez tout de même essayer les lunettes sur ce fond sombre.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white38),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _initializeCamera,
+                      child: const Text("Réessayer"),
+                    ),
+                  ],
+                ),
+              ),
+            )
           else
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+            const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.cyanAccent),
+                  SizedBox(height: 24),
+                  Text("Recherche de la caméra...", style: TextStyle(color: Colors.white70)),
+                ],
+              ),
+            ),
 
           // High-Tech HUD Layer
           _buildHUDOverlay(),
@@ -92,7 +190,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white24),
                     ),
@@ -134,7 +232,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
             width: 320,
             height: 450,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.cyanAccent.withOpacity(0.2), width: 1),
+              border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.2), width: 1),
               borderRadius: BorderRadius.circular(40),
             ),
             child: Stack(
@@ -144,42 +242,64 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
                 ...List.generate(6, (index) => _buildTrackingPoint(index)),
 
                 // Laser Scan Line
-                AnimatedBuilder(
-                  animation: _scanController,
-                  builder: (context, child) {
-                    double top = _scanController.value * 450;
-                    return Positioned(
-                      top: top,
-                      child: Container(
-                        width: 300,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              Colors.cyanAccent.withOpacity(0.8),
-                              Colors.transparent,
+                if (!_isScanningComplete)
+                  AnimatedBuilder(
+                    animation: _scanController,
+                    builder: (context, child) {
+                      double top = _scanController.value * 450;
+                      return Positioned(
+                        top: top,
+                        child: Container(
+                          width: 300,
+                          height: 2,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.cyanAccent.withValues(alpha: 0.8),
+                                Colors.transparent,
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.cyanAccent.withValues(alpha: 0.3),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              ),
                             ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.cyanAccent.withOpacity(0.3),
-                              blurRadius: 15,
-                              spreadRadius: 2,
-                            ),
-                          ],
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
 
                 // Virtual Glasses Overlay
-                FadeInDown(
-                  child: Image.asset(
-                    _glasses[_selectedGlassesIndex]['image']!,
-                    width: 260,
-                    fit: BoxFit.contain,
+                GestureDetector(
+                  onScaleStart: (details) {
+                    _baseScale = _scale;
+                  },
+                  onScaleUpdate: (details) {
+                    setState(() {
+                      _scale = _baseScale * details.scale;
+                      _offset += details.focalPointDelta;
+                    });
+                  },
+                  child: Transform.translate(
+                    offset: _offset,
+                    child: Transform.scale(
+                      scale: _scale,
+                      child: Visibility(
+                        visible: _isScanningComplete,
+                        child: FadeIn(
+                          duration: const Duration(milliseconds: 800),
+                          child: Image.asset(
+                            _glasses[_selectedGlassesIndex]['image']!,
+                            width: 260,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -196,7 +316,12 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
         Positioned(
           right: 30,
           bottom: 250,
-          child: _buildHUDSideLabel("FACE-SYNC: 98%\nLUMEN: 420\nAR-CORE: AKTIV", Icons.insights_rounded),
+          child: _buildHUDSideLabel(
+            _isScanningComplete 
+              ? "FACE-SYNC: 100%\nSTATUS: READY\nAR-CORE: AKTIV" 
+              : "FACE-SYNC: ANALYZING\nLUMEN: 420\nAR-CORE: AKTIV", 
+            Icons.insights_rounded
+          ),
         ),
       ],
     );
@@ -240,11 +365,11 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.cyanAccent.withOpacity(0.5), size: 16),
+          Icon(icon, color: Colors.cyanAccent.withValues(alpha: 0.5), size: 16),
           const SizedBox(height: 8),
           Text(
             text,
-            style: GoogleFonts.robotoMono(color: Colors.cyanAccent.withOpacity(0.7), fontSize: 10, height: 1.5),
+            style: GoogleFonts.robotoMono(color: Colors.cyanAccent.withValues(alpha: 0.7), fontSize: 10, height: 1.5),
           ),
         ],
       ),
@@ -262,51 +387,22 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> with SingleTick
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 32),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
               border: Border.all(color: Colors.white10),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Selection Carousel
-                SizedBox(
-                  height: 90,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: _glasses.length,
-                    itemBuilder: (context, index) {
-                      bool isSelected = _selectedGlassesIndex == index;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedGlassesIndex = index),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 80,
-                          margin: const EdgeInsets.only(right: 16),
-                          decoration: BoxDecoration(
-                            color: isSelected ? Colors.cyanAccent.withOpacity(0.2) : Colors.white10,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: isSelected ? Colors.cyanAccent : Colors.white10, width: 1),
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.asset(_glasses[index]['image']!, fit: BoxFit.contain),
-                              ),
-                              if (isSelected)
-                                Positioned(
-                                  bottom: 4,
-                                  child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Colors.cyanAccent, shape: BoxShape.circle)),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                // Model Info
+                Text(
+                  _glasses[_selectedGlassesIndex]['name']!.toUpperCase(),
+                  style: GoogleFonts.outfit(color: Colors.cyanAccent, fontWeight: FontWeight.bold, letterSpacing: 2),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Glissez pour déplacer • Pincez pour zoomer",
+                  style: TextStyle(color: Colors.white38, fontSize: 10),
                 ),
                 const SizedBox(height: 32),
                 // Main CTA

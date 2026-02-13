@@ -5,7 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:camera/camera.dart';
 
 class PrescriptionScanScreen extends StatefulWidget {
-  const PrescriptionScanScreen({Key? key}) : super(key: key);
+  const PrescriptionScanScreen({super.key});
 
   @override
   State<PrescriptionScanScreen> createState() => _PrescriptionScanScreenState();
@@ -96,7 +96,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white24),
                     ),
@@ -119,7 +119,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
       children: [
         // Darkened overlay with cutout
         ColorFiltered(
-          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.7), BlendMode.srcOut),
+          colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.7), BlendMode.srcOut),
           child: Stack(
             children: [
               Container(decoration: const BoxDecoration(color: Colors.black)),
@@ -206,7 +206,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
             height: 3,
             decoration: BoxDecoration(
               gradient: const LinearGradient(colors: [Colors.transparent, Color(0xFF6366F1), Colors.transparent]),
-              boxShadow: [BoxShadow(color: const Color(0xFF6366F1).withOpacity(0.5), blurRadius: 20, spreadRadius: 2)],
+              boxShadow: [BoxShadow(color: const Color(0xFF6366F1).withValues(alpha: 0.5), blurRadius: 20, spreadRadius: 2)],
             ),
           ),
         );
@@ -252,7 +252,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
                 width: double.infinity,
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A).withOpacity(0.8),
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(32),
                   border: Border.all(color: Colors.white10),
                 ),
@@ -261,7 +261,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
                   children: [
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: const Color(0xFF10B981).withValues(alpha: 0.1), shape: BoxShape.circle),
                       child: const Icon(Icons.check_rounded, color: Color(0xFF10B981), size: 32),
                     ),
                     const SizedBox(height: 24),
@@ -299,7 +299,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen> with Si
   Widget _buildResultItem(String title, String value, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
       child: Row(
         children: [
           Icon(icon, color: Colors.blueAccent, size: 20),

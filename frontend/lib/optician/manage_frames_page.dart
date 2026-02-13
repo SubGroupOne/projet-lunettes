@@ -90,7 +90,7 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20, offset: const Offset(0, 10))],
                     ),
                     child: Row(
                       children: [
@@ -114,7 +114,7 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: (frame['stock'] ?? 0) < 5 ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                                      color: (frame['stock'] ?? 0) < 5 ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -192,7 +192,9 @@ class _ManageFramesPageState extends State<ManageFramesPage> {
 
               if (response.statusCode == 201 || response.statusCode == 200) {
                 _fetchFrames();
-                if (mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),

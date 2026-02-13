@@ -3,11 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -40,10 +39,12 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compte créé !')));
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
       } else {
+        if (!mounted) return;
         final data = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Erreur')));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -127,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
           style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             filled: true, fillColor: Colors.white,
-            prefixIcon: Icon(icon, size: 20, color: const Color(0xFF0F172A).withOpacity(0.5)),
+            prefixIcon: Icon(icon, size: 20, color: const Color(0xFF0F172A).withValues(alpha: 0.5)),
             suffixIcon: isPassword ? IconButton(icon: Icon(obscureText ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 20), onPressed: onToggleVisibility) : null,
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.black12)),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2)),

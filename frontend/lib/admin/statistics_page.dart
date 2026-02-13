@@ -6,7 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 class StatisticsPage extends StatefulWidget {
   final String accessToken;
 
-  const StatisticsPage({Key? key, required this.accessToken}) : super(key: key);
+  const StatisticsPage({super.key, required this.accessToken});
 
   @override
   State<StatisticsPage> createState() => _StatisticsPageState();
@@ -47,7 +47,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         });
       }
     } catch (e) {
-      print('Error loading stats: $e');
+      debugPrint('Error loading stats: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -78,11 +78,17 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Widget _buildOrderStats() {
     if (_orderStats == null) return const SizedBox();
 
-    final total = _orderStats!['total'] ?? 0;
-    final pending = _orderStats!['pending'] ?? 0;
-    final confirmed = _orderStats!['confirmed'] ?? 0;
-    final delivered = _orderStats!['delivered'] ?? 0;
-    final cancelled = _orderStats!['cancelled'] ?? 0;
+    double toDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString()) ?? 0.0;
+    }
+
+    final pending = toDouble(_orderStats!['pending']);
+    final confirmed = toDouble(_orderStats!['confirmed']);
+    final delivered = toDouble(_orderStats!['delivered']);
+    final cancelled = toDouble(_orderStats!['cancelled']);
+    final total = toDouble(_orderStats!['total']).toInt();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +169,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),

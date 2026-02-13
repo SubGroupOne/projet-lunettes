@@ -17,6 +17,7 @@ class SessionService extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   String? get userName => _userName;
   String? get userEmail => _userEmail;
+  int? get userId => _userId;
   String? get token => _token;
 
   SessionService() {
@@ -38,6 +39,28 @@ class SessionService extends ChangeNotifier {
       _isLoggedIn = false;
       _token = null;
     }
+    notifyListeners();
+  }
+
+  /// Met à jour manuellement la session après login
+  Future<void> updateSession({
+    required String token,
+    required String name,
+    required String email,
+    required int id,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+    await prefs.setString('userName', name);
+    await prefs.setString('userEmail', email);
+    await prefs.setInt('userId', id);
+
+    _isLoggedIn = true;
+    _token = token;
+    _userName = name;
+    _userEmail = email;
+    _userId = id;
+    
     notifyListeners();
   }
 

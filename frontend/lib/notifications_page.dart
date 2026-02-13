@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 class NotificationsPage extends StatefulWidget {
   final String accessToken;
 
-  const NotificationsPage({Key? key, required this.accessToken}) : super(key: key);
+  const NotificationsPage({super.key, required this.accessToken});
 
   @override
   State<NotificationsPage> createState() => _NotificationsPageState();
@@ -137,7 +137,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
           side: BorderSide(
-            color: isRead ? Colors.transparent : Colors.indigo.withOpacity(0.3),
+            color: isRead ? Colors.transparent : Colors.indigo.withValues(alpha: 0.3),
             width: 2,
           ),
         ),
@@ -147,7 +147,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           child: Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: isRead ? Colors.white : Colors.indigo.withOpacity(0.05),
+              color: isRead ? Colors.white : Colors.indigo.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
@@ -157,7 +157,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getTypeColor(type).withOpacity(0.1),
+                    color: _getTypeColor(type).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

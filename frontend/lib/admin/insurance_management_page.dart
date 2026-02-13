@@ -5,7 +5,7 @@ import 'dart:convert';
 class InsuranceManagementPage extends StatefulWidget {
   final String accessToken;
 
-  const InsuranceManagementPage({Key? key, required this.accessToken}) : super(key: key);
+  const InsuranceManagementPage({super.key, required this.accessToken});
 
   @override
   State<InsuranceManagementPage> createState() => _InsuranceManagementPageState();
@@ -40,7 +40,8 @@ class _InsuranceManagementPageState extends State<InsuranceManagementPage> {
         });
       }
     } catch (e) {
-      print('Error loading insurances: $e');
+      debugPrint('Error loading insurances: $e');
+      if (!context.mounted) return;
       setState(() => _isLoading = false);
     }
   }
@@ -153,12 +154,14 @@ class _InsuranceManagementPageState extends State<InsuranceManagementPage> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(id == null ? 'Assurance créée ✅' : 'Assurance mise à jour ✅')),
         );
         _loadInsurances();
       }
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
@@ -177,12 +180,14 @@ class _InsuranceManagementPageState extends State<InsuranceManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(isActive ? 'Assurance désactivée ❌' : 'Assurance activée ✅')),
         );
         _loadInsurances();
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
@@ -220,12 +225,14 @@ class _InsuranceManagementPageState extends State<InsuranceManagementPage> {
       );
 
       if (response.statusCode == 200) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Assurance supprimée ✅')),
         );
         _loadInsurances();
       }
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
@@ -280,7 +287,7 @@ class _InsuranceManagementPageState extends State<InsuranceManagementPage> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.health_and_safety,
                   color: Colors.teal,
                   size: 30,
