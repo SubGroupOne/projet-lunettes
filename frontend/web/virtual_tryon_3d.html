@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Vision — Essai 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0A0A0F;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  #container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    z-index: 1;
+  }
+
+  #three-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  #hud {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 28px; height: 28px;
+    border-color: #00FFFF;
+    border-style: solid;
+    opacity: 0.7;
+  }
+  .corner.tl { top: 20px; left: 20px; border-width: 2px 0 0 2px; }
+  .corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 100px; left: 20px; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 100px; right: 20px; border-width: 0 2px 2px 0; }
+
+  #status-bar {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #00FFFF;
+  }
+
+  #status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00FFFF;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  #bottom-panel {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 4;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 20px 24px;
+  }
+
+  #glasses-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  #glasses-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+
+  #glasses-list::-webkit-scrollbar { display: none; }
+
+  .glasses-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .glasses-thumb {
+    width: 72px; height: 40px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+
+  .glasses-thumb .glasses-icon {
+    font-size: 22px;
+  }
+
+  .glasses-item.active .glasses-thumb {
+    border-color: #00FFFF;
+    background: rgba(0,255,255,0.1);
+    box-shadow: 0 0 12px rgba(0,255,255,0.3);
+  }
+
+  .glasses-name {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    text-align: center;
+    max-width: 72px;
+    word-break: break-word;
+  }
+
+  .glasses-item.active .glasses-name {
+    color: #00FFFF;
+  }
+
+  #close-btn {
+    position: absolute;
+    top: 16px; left: 16px;
+    z-index: 5;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  #close-btn:hover { background: rgba(255,0,0,0.3); border-color: rgba(255,0,0,0.5); }
+
+  #loading {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+    color: #00FFFF;
+  }
+
+  #loading-spinner {
+    width: 48px; height: 48px;
+    border: 2px solid rgba(0,255,255,0.2);
+    border-top-color: #00FFFF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #loading-text {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  #face-indicator {
+    position: absolute;
+    top: 60px; right: 16px;
+    z-index: 4;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,255,255,0.3);
+    color: #00FFFF;
+    transition: all 0.3s;
+  }
+
+  #face-indicator.detected {
+    border-color: rgba(0,255,100,0.5);
+    color: #00FF64;
+  }
+
+  #face-indicator.not-detected {
+    border-color: rgba(255,100,0,0.5);
+    color: #FF6400;
+  }
+
+  #error-msg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+    display: none;
+  }
+
+  #error-msg p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 16px;
+  }
+
+  #retry-btn {
+    padding: 10px 24px;
+    background: #00FFFF;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div id="container">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="three-canvas"></canvas>
+
+  <div id="hud">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+  </div>
+
+  <div id="status-bar">
+    <div id="status-dot"></div>
+    <span id="status-text">Initialisation...</span>
+  </div>
+
+  <div id="face-indicator">Recherche visage...</div>
+
+  <!-- Bouton fermer → ferme l'onglet -->
+  <button id="close-btn" onclick="closeApp()">✕</button>
+
+  <div id="loading">
+    <div id="loading-spinner"></div>
+    <div id="loading-text">Chargement IA...</div>
+  </div>
+
+  <div id="error-msg">
+    <p>Caméra non accessible.<br>Vérifiez les permissions.</p>
+    <button id="retry-btn" onclick="location.reload()">Réessayer</button>
+  </div>
+
+  <div id="bottom-panel">
+    <div id="glasses-label">Choisir une monture</div>
+    <div id="glasses-list"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════════
+
+const API_BASE = 'http://localhost:3000';
+const GLB_BASE_PATH = 'assets/glasses/3D/';
+
+// Catalogue complet avec tous tes fichiers GLB
+let GLASSES_CATALOG = [
+  { id: '1',  name: 'Black Classic', file: 'black_eyeglasses.glb'                       },
+  { id: '2',  name: 'Eyeglasses',    file: 'eyeglasses.glb'                              },
+  { id: '3',  name: 'Modele A01',    file: 'eyeglasses_a01.glb'                          },
+  { id: '4',  name: 'Black V5',      file: 'eyeglasses_black_v5.glb'                     },
+  { id: '5',  name: 'Specs',         file: 'eyeglasses_specs.glb'                        },
+  { id: '6',  name: 'Eyewear',       file: 'eyewear_specs.glb'                           },
+  { id: '7',  name: 'Glasses',       file: 'glasses.glb'                                 },
+  { id: '8',  name: 'Ray-Ban',       file: 'ray_ban_glasses.glb'                         },
+  { id: '9',  name: 'Rounded',       file: 'rounded_rectangle_eyeglasses.glb'            },
+  { id: '10', name: 'Wayfarer',      file: 'wayfarer_sunglasses_-_eyeglasses_rims.glb'   },
+  { id: '11', name: 'Wayfarer V2',   file: 'wayfarer_sunglasses_eyeglasses_rims.glb'     },
+];
+
+// ═══════════════════════════════════════════════════════════
+// VARIABLES GLOBALES
+// ═══════════════════════════════════════════════════════════
+
+let scene, camera, renderer;
+let currentGlassesModel = null;
+let selectedGlassesIndex = 0;
+let faceLandmarker = null;
+let lastVideoTime = -1;
+let faceDetected = false;
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('three-canvas');
+const loading = document.getElementById('loading');
+const statusText = document.getElementById('status-text');
+const faceIndicator = document.getElementById('face-indicator');
+
+// ═══════════════════════════════════════════════════════════
+// THREE.JS SETUP
+// ═══════════════════════════════════════════════════════════
+
+function initThreeJS() {
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.z = 5;
+
+  renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: true,
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x000000, 0);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+  dirLight.position.set(0, 1, 3);
+  scene.add(dirLight);
+
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(-2, 2, 2);
+  scene.add(pointLight);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARGEMENT GLB
+// ═══════════════════════════════════════════════════════════
+
+function loadGLBModel(filename) {
+  return new Promise((resolve) => {
+    const url = GLB_BASE_PATH + filename;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error(`GLB non trouvé: ${url}`);
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        const view = new DataView(buffer);
+        const magic = view.getUint32(0, true);
+
+        if (magic !== 0x46546C67) {
+          resolve(createDemoGlasses());
+          return;
+        }
+
+        if (typeof THREE.GLTFLoader !== 'undefined') {
+          const blob = new Blob([buffer], { type: 'model/gltf-binary' });
+          const blobUrl = URL.createObjectURL(blob);
+          const loader = new THREE.GLTFLoader();
+          loader.load(blobUrl, (gltf) => {
+            URL.revokeObjectURL(blobUrl);
+            resolve(gltf.scene);
+          }, undefined, () => {
+            URL.revokeObjectURL(blobUrl);
+            resolve(createDemoGlasses());
+          });
+        } else {
+          resolve(createDemoGlasses());
+        }
+      })
+      .catch(() => resolve(createDemoGlasses()));
+  });
+}
+
+function createDemoGlasses() {
+  const group = new THREE.Group();
+  const colors = [0xC0A060, 0x1A1A1A, 0x8B4513, 0x2C3E50, 0x8B2252, 0x2E8B57, 0x4B0082, 0x8B0000, 0x006400, 0x00008B, 0x8B008B];
+  const color = colors[selectedGlassesIndex % colors.length];
+  const mat = new THREE.MeshStandardMaterial({ color, metalness: 0.7, roughness: 0.3 });
+
+  const leftLens = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.015, 8, 32), mat);
+  leftLens.position.set(-0.22, 0, 0);
+  group.add(leftLens);
+
+  const rightLens = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.015, 8, 32), mat);
+  rightLens.position.set(0.22, 0, 0);
+  group.add(rightLens);
+
+  const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.08, 8), mat);
+  bridge.rotation.z = Math.PI / 2;
+  group.add(bridge);
+
+  const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.45, 8), mat);
+  leftArm.rotation.z = Math.PI / 2;
+  leftArm.position.set(-0.62, 0, -0.05);
+  group.add(leftArm);
+
+  const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.45, 8), mat);
+  rightArm.rotation.z = Math.PI / 2;
+  rightArm.position.set(0.62, 0, -0.05);
+  group.add(rightArm);
+
+  return group;
+}
+
+async function switchGlasses(index) {
+  selectedGlassesIndex = index;
+
+  if (currentGlassesModel) {
+    scene.remove(currentGlassesModel);
+    currentGlassesModel = null;
+  }
+
+  document.querySelectorAll('.glasses-item').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+
+  setStatus('Chargement modèle...');
+
+  const glasses = GLASSES_CATALOG[index];
+  const model = await loadGLBModel(glasses.file);
+
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = 0.8 / maxDim;
+  model.scale.setScalar(scale);
+
+  const center = box.getCenter(new THREE.Vector3());
+  model.position.sub(center.multiplyScalar(scale));
+
+  scene.add(model);
+  currentGlassesModel = model;
+  setStatus('Prêt — ' + glasses.name);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEDIAPIPE
+// ═══════════════════════════════════════════════════════════
+
+async function initMediaPipe() {
+  setStatus('Chargement MediaPipe...');
+  try {
+    const { FaceLandmarker, FilesetResolver } = await import(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs'
+    );
+
+    const filesetResolver = await FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm'
+    );
+
+    faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+      baseOptions: {
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+        delegate: 'GPU',
+      },
+      runningMode: 'VIDEO',
+      numFaces: 1,
+      minFaceDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+
+    setStatus('MediaPipe chargé ✅');
+    return true;
+  } catch (e) {
+    console.error('MediaPipe erreur:', e);
+    setStatus('Mode fallback');
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEBCAM
+// ═══════════════════════════════════════════════════════════
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 1280, height: 720, facingMode: 'user' },
+      audio: false,
+    });
+    video.srcObject = stream;
+    await video.play();
+    setStatus('Caméra activée ✅');
+    return true;
+  } catch (e) {
+    document.getElementById('error-msg').style.display = 'block';
+    loading.style.display = 'none';
+    return false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOUCLE DE RENDU
+// ═══════════════════════════════════════════════════════════
+
+const LEFT_EYE_OUTER  = 33;
+const RIGHT_EYE_OUTER = 263;
+
+function renderLoop() {
+  requestAnimationFrame(renderLoop);
+
+  if (!video.videoWidth || !currentGlassesModel) {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  if (faceLandmarker && video.currentTime !== lastVideoTime) {
+    lastVideoTime = video.currentTime;
+    try {
+      const results = faceLandmarker.detectForVideo(video, Date.now());
+      if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+        placeLandmarks(results.faceLandmarks[0]);
+        faceDetected = true;
+        currentGlassesModel.visible = true;
+      } else {
+        faceDetected = false;
+        if (currentGlassesModel) currentGlassesModel.visible = false;
+      }
+    } catch(e) {}
+  }
+
+  faceIndicator.textContent = faceDetected ? 'Visage détecté ✅' : 'Recherche visage...';
+  faceIndicator.className = faceDetected ? 'detected' : 'not-detected';
+
+  renderer.render(scene, camera);
+}
+
+function placeLandmarks(landmarks) {
+  if (!currentGlassesModel) return;
+
+  const lo = landmarks[LEFT_EYE_OUTER];
+  const ro = landmarks[RIGHT_EYE_OUTER];
+
+  const loX = -(lo.x * 2 - 1);
+  const loY = -(lo.y * 2 - 1);
+  const roX = -(ro.x * 2 - 1);
+  const roY = -(ro.y * 2 - 1);
+
+  const cx = (loX + roX) / 2;
+  const cy = (loY + roY) / 2;
+
+  const eyeDist = Math.sqrt((roX - loX) ** 2 + (roY - loY) ** 2);
+  const glassesScale = eyeDist * 2.8;
+  const angle = Math.atan2(roY - loY, roX - loX);
+  const depth = -1 + (1 - lo.z) * 0.5;
+
+  currentGlassesModel.position.set(cx * 3.5, cy * 2.5 + 0.05, depth);
+  currentGlassesModel.rotation.set(0, 0, -angle);
+  currentGlassesModel.scale.setScalar(glassesScale * 2.5);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CATALOGUE UI
+// ═══════════════════════════════════════════════════════════
+
+function buildGlassesList() {
+  const list = document.getElementById('glasses-list');
+  list.innerHTML = '';
+
+  GLASSES_CATALOG.forEach((g, i) => {
+    const item = document.createElement('div');
+    item.className = 'glasses-item' + (i === 0 ? ' active' : '');
+    item.onclick = () => switchGlasses(i);
+
+    const thumb = document.createElement('div');
+    thumb.className = 'glasses-thumb';
+    thumb.innerHTML = '<span class="glasses-icon">👓</span>';
+
+    const name = document.createElement('div');
+    name.className = 'glasses-name';
+    name.textContent = g.name;
+
+    item.appendChild(thumb);
+    item.appendChild(name);
+    list.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITAIRES
+// ═══════════════════════════════════════════════════════════
+
+function setStatus(msg) {
+  statusText.textContent = msg;
+}
+
+// ✅ CORRIGÉ : ferme l'onglet et retourne sur l'app Flutter
+function closeApp() {
+  window.close();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INITIALISATION
+// ═══════════════════════════════════════════════════════════
+
+async function init() {
+  setStatus('Démarrage...');
+  initThreeJS();
+
+  const camOk = await startCamera();
+  if (!camOk) return;
+
+  buildGlassesList();
+  await initMediaPipe();
+  await switchGlasses(0);
+
+  loading.style.display = 'none';
+  renderLoop();
+  setStatus('Smart Vision 3D — Actif');
+}
+
+init();
+</script>
+
+<script>
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+document.head.appendChild(script);
+</script>
+
+</body>
+</html>

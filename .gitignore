@@ -225,6 +225,13 @@ uploads/
 user-uploads/
 
 # ========================
+# PYTHON
+# ========================
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# ========================
 # SECURITY
 # ========================
 
@@ -237,3 +244,8 @@ id_ed25519*
 .apikeys
 secrets.json
 credentials.json
+
+# ========================
+# MISC
+# ========================
+frontend/google-chrome-stable_current_amd64.deb

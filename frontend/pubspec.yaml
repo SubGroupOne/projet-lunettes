@@ -65,6 +65,7 @@ flutter:
     - assets/icons/
     - assets/glasses/
     - assets/photos/
+    - assets/glasses/3D/
 
 dependency_overrides:
   carousel_slider: 5.0.0
