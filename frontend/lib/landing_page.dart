@@ -23,10 +23,10 @@ class _LandingPageState extends State<LandingPage> {
   final List<String> _filters = ['TOUT', 'HOMME', 'FEMME', 'SOLAIRE', 'LUXE'];
 
   final List<Map<String, String>> _featuredGlasses = [
-    {'name': 'Aviator Classic', 'brand': 'Ray-Ban', 'image': 'assets/glasses/image.jpeg', 'price': '145 €'},
-    {'name': 'Wayfarer Noir', 'brand': 'Oakley', 'image': 'assets/glasses/image2.jpg', 'price': '120 €'},
-    {'name': 'Clubmaster Gold', 'brand': 'Ray-Ban', 'image': 'assets/glasses/image4.jpg', 'price': '160 €'},
-    {'name': 'Sport X-Extreme', 'brand': 'Nike', 'image': 'assets/glasses/image5.jpg', 'price': '135 €'},
+    {'name': 'Aviator Classic', 'brand': 'Ray-Ban', 'image': 'assets/glasses/img1.jpg', 'price': '145 €'},
+    {'name': 'Wayfarer Noir', 'brand': 'Oakley', 'image': 'assets/glasses/img2.jpg', 'price': '120 €'},
+    {'name': 'Clubmaster Gold', 'brand': 'Ray-Ban', 'image': 'assets/glasses/img4.jpg', 'price': '160 €'},
+    {'name': 'Sport X-Extreme', 'brand': 'Nike', 'image': 'assets/glasses/img5.jpg', 'price': '135 €'},
   ];
 
   @override
@@ -133,10 +133,10 @@ class _LandingPageState extends State<LandingPage> {
 
   Widget _buildCatalogGridWithFilters() {
     final List<Map<String, String>> catalog = [
-      {'name': 'Onyx Pro', 'brand': 'Gunnar', 'image': 'assets/glasses/image.jpeg', 'price': '95 €'},
-      {'name': 'Luxury Panther', 'brand': 'Cartier', 'image': 'assets/glasses/image2.jpg', 'price': '750 €'},
-      {'name': 'Metal Minimal', 'brand': 'Prada', 'image': 'assets/glasses/image4.jpg', 'price': '220 €'},
-      {'name': 'Sport Ultra', 'brand': 'Nike', 'image': 'assets/glasses/image5.jpg', 'price': '155 €'},
+      {'name': 'Onyx Pro', 'brand': 'Gunnar', 'image': 'assets/glasses/img1.jpg', 'price': '95 €'},
+      {'name': 'Luxury Panther', 'brand': 'Cartier', 'image': 'assets/glasses/img2.jpg', 'price': '750 €'},
+      {'name': 'Metal Minimal', 'brand': 'Prada', 'image': 'assets/glasses/img4.jpg', 'price': '220 €'},
+      {'name': 'Sport Ultra', 'brand': 'Nike', 'image': 'assets/glasses/img5.jpg', 'price': '155 €'},
     ];
 
     return Padding(

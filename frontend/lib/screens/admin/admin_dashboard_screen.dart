@@ -29,8 +29,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       price: 45000,
       color: 'Noir',
       material: 'Métal',
-      mainImage: 'assets/glasses/image.jpeg',
-      images: ['assets/glasses/image.jpeg'],
+      mainImage: 'assets/glasses/img1.jpg',
+      images: ['assets/glasses/img1.jpg'],
       isAvailable: true,
       description: 'Protection UV maximale.',
     ),
@@ -42,8 +42,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       price: 27000,
       color: 'Noir',
       material: 'Acétate',
-      mainImage: 'assets/glasses/image2.jpg',  // ⬅️ CORRIGÉ
-      images: ['assets/glasses/image2.jpg'],
+      mainImage: 'assets/glasses/img2.jpg',  // ⬅️ CORRIGÉ
+      images: ['assets/glasses/img2.jpg'],
       isAvailable: true,
       description: 'Monture légère et confortable.',
     ),
@@ -55,8 +55,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       price: 27000,
       color: 'Noir',
       material: 'Acétate',
-      mainImage: 'assets/glasses/image4.jpg',  // ⬅️ CORRIGÉ
-      images: ['assets/glasses/image4.jpg'],
+      mainImage: 'assets/glasses/img4.jpg',  // ⬅️ CORRIGÉ
+      images: ['assets/glasses/img4.jpg'],
       isAvailable: true,
       description: 'Monture légère et confortable.',
     ),
@@ -68,8 +68,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       price: 26000,
       color: 'Noir',
       material: 'Acétate',
-      mainImage: 'assets/glasses/image5.jpg',  // ⬅️ CORRIGÉ
-      images: ['assets/glasses/image5.jpg'],
+      mainImage: 'assets/glasses/img5.jpg',  // ⬅️ CORRIGÉ
+      images: ['assets/glasses/img5.jpg'],
       isAvailable: true,
       description: 'Monture légère et confortable.',
     ),

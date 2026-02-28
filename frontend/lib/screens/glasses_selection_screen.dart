@@ -40,10 +40,10 @@ class _GlassesSelectionScreenState extends State<GlassesSelectionScreen> with Si
   void _loadMockData() {
     setState(() {
       _glassesList = [
-        GlassesModel(id: '1', name: 'Aviator Gold', brand: 'Ray-Ban', category: 'Solaire', price: 145, color: 'Or', material: 'Métal', mainImage: 'image.jpeg', images: ['image.jpeg'], isAvailable: true, description: 'La légende intemporelle pour un style affirmé.'),
-        GlassesModel(id: '2', name: 'Wayfarer Lite', brand: 'Oakley', category: 'Optique', price: 120, color: 'Noir', material: 'Acétate', mainImage: 'image2.jpg', images: ['image2.jpg'], isAvailable: true, description: 'Légèreté et robustesse pour un confort quotidien.'),
-        GlassesModel(id: '3', name: 'Clubmaster V1', brand: 'Ray-Ban', category: 'Solaire', price: 160, color: 'Écaille', material: 'Métal/Bois', mainImage: 'image4.jpg', images: ['image4.jpg'], isAvailable: true, description: 'Un look vintage élégant et sophistiqué.'),
-        GlassesModel(id: '4', name: 'Sport Pro', brand: 'Nike', category: 'Sport', price: 135, color: 'Bleu', material: 'Polymère', mainImage: 'image5.jpg', images: ['image5.jpg'], isAvailable: true, description: 'Conçue pour la performance et le mouvement.'),
+        GlassesModel(id: '1', name: 'Aviator Gold', brand: 'Ray-Ban', category: 'Solaire', price: 145, color: 'Or', material: 'Métal', mainImage: 'img1.jpg', images: ['img1.jpg'], isAvailable: true, description: 'La légende intemporelle pour un style affirmé.'),
+        GlassesModel(id: '2', name: 'Wayfarer Lite', brand: 'Oakley', category: 'Optique', price: 120, color: 'Noir', material: 'Acétate', mainImage: 'img2.jpg', images: ['img2.jpg'], isAvailable: true, description: 'Légèreté et robustesse pour un confort quotidien.'),
+        GlassesModel(id: '3', name: 'Clubmaster V1', brand: 'Ray-Ban', category: 'Solaire', price: 160, color: 'Écaille', material: 'Métal/Bois', mainImage: 'img4.jpg', images: ['img4.jpg'], isAvailable: true, description: 'Un look vintage élégant et sophistiqué.'),
+        GlassesModel(id: '4', name: 'Sport Pro', brand: 'Nike', category: 'Sport', price: 135, color: 'Bleu', material: 'Polymère', mainImage: 'img5.jpg', images: ['img5.jpg'], isAvailable: true, description: 'Conçue pour la performance et le mouvement.'),
       ];
       _isLoading = false;
     });

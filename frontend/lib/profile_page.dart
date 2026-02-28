@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'order_tracking_page.dart';
+import 'face_analysis_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String accessToken;
@@ -73,16 +74,25 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.2), width: 2),
+                border: Border.all(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                    width: 2),
               ),
               child: const CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/300?u=vision'),
+                backgroundImage:
+                    NetworkImage('https://i.pravatar.cc/300?u=vision'),
               ),
             ),
             const SizedBox(height: 16),
-            Text(userName, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
-            Text(userEmail, style: GoogleFonts.inter(fontSize: 14, color: Colors.grey[600])),
+            Text(userName,
+                style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A))),
+            Text(userEmail,
+                style: GoogleFonts.inter(
+                    fontSize: 14, color: Colors.grey[600])),
           ],
         ),
       ),
@@ -92,6 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildBentoSettingsGrid() {
     return Column(
       children: [
+        // Ligne 1 — Ordonnances + Commandes
         Row(
           children: [
             Expanded(
@@ -108,12 +119,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'Commandes',
                 icon: Icons.shopping_bag_rounded,
                 color: const Color(0xFF3B82F6),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => OrderTrackingPage(accessToken: widget.accessToken))),
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => OrderTrackingPage(
+                            accessToken: widget.accessToken))),
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
+
+        // Ligne 2 — Assurances + Favoris
         Row(
           children: [
             Expanded(
@@ -136,6 +153,29 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
         const SizedBox(height: 16),
+
+        // Ligne 3 — Essai IA (pleine largeur)
+        Row(
+          children: [
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Essai IA 👓',
+                icon: Icons.face_retouching_natural_rounded,
+                color: const Color(0xFF8B5CF6),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        FaceAnalysisPage(accessToken: widget.accessToken),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Paramètres du compte
         _buildFullWidthBentoItem(
           title: 'Paramètres du compte',
           subtitle: 'Sécurité, Notifications, Confidentialité',
@@ -146,7 +186,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildBentoItem({required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildBentoItem({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return FadeInUp(
       child: GestureDetector(
         onTap: onTap,
@@ -155,18 +200,29 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10))
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12)),
                 child: Icon(icon, color: color, size: 24),
               ),
               const SizedBox(height: 20),
-              Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF0F172A))),
+              Text(title,
+                  style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: const Color(0xFF0F172A))),
             ],
           ),
         ),
@@ -174,7 +230,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildFullWidthBentoItem({required String title, required String subtitle, required IconData icon, required VoidCallback onTap}) {
+  Widget _buildFullWidthBentoItem({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return FadeInUp(
       child: GestureDetector(
         onTap: onTap,
@@ -183,26 +244,41 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10))
+            ],
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(16)),
-                child: const Icon(Icons.settings_rounded, color: Color(0xFF0F172A)),
+                decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(16)),
+                child: const Icon(Icons.settings_rounded,
+                    color: Color(0xFF0F172A)),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF0F172A))),
-                    Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[500])),
+                    Text(title,
+                        style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: const Color(0xFF0F172A))),
+                    Text(subtitle,
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: Colors.grey[500])),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black26),
+              const Icon(Icons.arrow_forward_ios_rounded,
+                  size: 16, color: Colors.black26),
             ],
           ),
         ),
@@ -218,15 +294,22 @@ class _ProfilePageState extends State<ProfilePage> {
         child: TextButton(
           onPressed: _logout,
           style: TextButton.styleFrom(
-            backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.05),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor:
+                const Color(0xFFEF4444).withValues(alpha: 0.05),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 20),
+              const Icon(Icons.logout_rounded,
+                  color: Color(0xFFEF4444), size: 20),
               const SizedBox(width: 12),
-              Text("SE DÉCONNECTER", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFEF4444), letterSpacing: 1)),
+              Text("SE DÉCONNECTER",
+                  style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFEF4444),
+                      letterSpacing: 1)),
             ],
           ),
         ),
@@ -239,7 +322,9 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.only(top: 10, bottom: 30),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black.withValues(alpha: 0.05))),
+        border: Border(
+            top: BorderSide(
+                color: Colors.black.withValues(alpha: 0.05))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -253,18 +338,37 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _navItem(IconData icon, String label, bool isSelected, int index) {
+  Widget _navItem(
+      IconData icon, String label, bool isSelected, int index) {
     return GestureDetector(
       onTap: () {
-        if (index == 0) Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        if (index == 2) Navigator.push(context, MaterialPageRoute(builder: (_) => OrderTrackingPage(accessToken: widget.accessToken)));
+        if (index == 0)
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/', (route) => false);
+        if (index == 2)
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => OrderTrackingPage(
+                      accessToken: widget.accessToken)));
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isSelected ? const Color(0xFF6366F1) : Colors.black26),
+          Icon(icon,
+              color: isSelected
+                  ? const Color(0xFF6366F1)
+                  : Colors.black26),
           const SizedBox(height: 4),
-          Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF6366F1) : Colors.black26)),
+          Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: isSelected
+                      ? FontWeight.bold
+                      : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF6366F1)
+                      : Colors.black26)),
         ],
       ),
     );
