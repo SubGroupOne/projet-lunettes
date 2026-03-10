@@ -39,7 +39,7 @@ class _PrescriptionScanScreenState extends State<PrescriptionScanScreen>
   final ImagePicker _imagePicker = ImagePicker();
 
   // ⚠️ Remplace par l'IP de ton PC si accès depuis téléphone
-  static const String _apiUrl = 'http://192.168.100.19:5001/scan-ordonnance';
+  static const String _apiUrl = 'http://192.168.100.9:5001/scan-ordonnance';
 
   @override
   void initState() {

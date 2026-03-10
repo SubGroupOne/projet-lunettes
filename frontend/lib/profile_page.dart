@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'order_tracking_page.dart';
+import 'ordonnances_page.dart';
+import 'favoris_page.dart';
+import 'screens/insurance_simulation_screen.dart';
 import 'face_analysis_page.dart';
+import 'notifications_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String accessToken;
@@ -17,11 +23,13 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String userName = 'Chargement...';
   String userEmail = '...';
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _fetchUnreadCount();
   }
 
   Future<void> _loadUserData() async {
@@ -30,6 +38,21 @@ class _ProfilePageState extends State<ProfilePage> {
       userName = prefs.getString('userName') ?? 'Utilisateur';
       userEmail = prefs.getString('userEmail') ?? 'email@exemple.com';
     });
+  }
+
+  Future<void> _fetchUnreadCount() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/notifications/unread-count'),
+        headers: {'Authorization': 'Bearer ${widget.accessToken}'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() => _unreadCount = data['count'] ?? 0);
+      }
+    } catch (e) {
+      debugPrint('Error fetching unread count: $e');
+    }
   }
 
   Future<void> _logout() async {
@@ -44,8 +67,46 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('Mon Profil', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('Mon Profil',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
+        actions: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          NotificationsPage(accessToken: widget.accessToken),
+                    ),
+                  );
+                  _fetchUnreadCount();
+                },
+                icon: const Icon(Icons.notifications_outlined),
+              ),
+              if (_unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                        color: Color(0xFF6366F1), shape: BoxShape.circle),
+                    child: Text(
+                      '$_unreadCount',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -102,7 +163,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildBentoSettingsGrid() {
     return Column(
       children: [
-        // Ligne 1 — Ordonnances + Commandes
         Row(
           children: [
             Expanded(
@@ -110,7 +170,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'Ordonnances',
                 icon: Icons.assignment_rounded,
                 color: const Color(0xFF6366F1),
-                onTap: () {},
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => OrdonnancesPage(
+                            accessToken: widget.accessToken))),
               ),
             ),
             const SizedBox(width: 16),
@@ -129,8 +193,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Ligne 2 — Assurances + Favoris
         Row(
           children: [
             Expanded(
@@ -138,7 +200,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'Assurances',
                 icon: Icons.verified_user_rounded,
                 color: const Color(0xFF10B981),
-                onTap: () {},
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const InsuranceSimulationScreen())),
               ),
             ),
             const SizedBox(width: 16),
@@ -147,19 +212,38 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: 'Favoris',
                 icon: Icons.favorite_rounded,
                 color: const Color(0xFFEF4444),
-                onTap: () {},
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            FavorisPage(accessToken: widget.accessToken))),
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-
-        // Ligne 3 — Essai IA (pleine largeur)
         Row(
           children: [
             Expanded(
               child: _buildBentoItem(
-                title: 'Essai IA 👓',
+                title: 'Notifications',
+                icon: Icons.notifications_rounded,
+                color: const Color(0xFFF59E0B),
+                badge: _unreadCount,
+                onTap: () async {
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => NotificationsPage(
+                              accessToken: widget.accessToken)));
+                  _fetchUnreadCount();
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildBentoItem(
+                title: 'Essai IA',
                 icon: Icons.face_retouching_natural_rounded,
                 color: const Color(0xFF8B5CF6),
                 onTap: () => Navigator.push(
@@ -174,11 +258,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Paramètres du compte
         _buildFullWidthBentoItem(
-          title: 'Paramètres du compte',
-          subtitle: 'Sécurité, Notifications, Confidentialité',
+          title: 'Parametres du compte',
+          subtitle: 'Securite, Notifications, Confidentialite',
           icon: Icons.settings_rounded,
           onTap: () {},
         ),
@@ -191,6 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    int badge = 0,
   }) {
     return FadeInUp(
       child: GestureDetector(
@@ -210,12 +293,35 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12)),
-                child: Icon(icon, color: color, size: 24),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
+                  if (badge > 0)
+                    Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                            color: Color(0xFF6366F1),
+                            shape: BoxShape.circle),
+                        child: Text(
+                          '$badge',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 20),
               Text(title,
@@ -305,7 +411,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const Icon(Icons.logout_rounded,
                   color: Color(0xFFEF4444), size: 20),
               const SizedBox(width: 12),
-              Text("SE DÉCONNECTER",
+              Text("SE DECONNECTER",
                   style: GoogleFonts.outfit(
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFFEF4444),
@@ -356,9 +462,8 @@ class _ProfilePageState extends State<ProfilePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon,
-              color: isSelected
-                  ? const Color(0xFF6366F1)
-                  : Colors.black26),
+              color:
+                  isSelected ? const Color(0xFF6366F1) : Colors.black26),
           const SizedBox(height: 4),
           Text(label,
               style: GoogleFonts.inter(

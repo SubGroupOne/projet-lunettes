@@ -8,6 +8,7 @@ import '../services/session_service.dart';
 import 'virtual_try_on_screen.dart';
 import '../payment_confirmation_page.dart';
 import '../login_page.dart';
+import 'comparison_screen.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
@@ -33,7 +34,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
   List<Product> get _filteredProducts {
     if (_activeCategory == 'TOUT') return _allProducts;
-    
+
     if (_activeCategory == 'VUE') {
       return [...EyeglassesProducts.men, ...EyeglassesProducts.women, ...EyeglassesProducts.kids];
     } else if (_activeCategory == 'SOLAIRE') {
@@ -49,7 +50,6 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   double _parsePrice(String priceStr) {
-    // Nettoie "45 000 F" en 45000.0
     String clean = priceStr.replaceAll(RegExp(r'[^0-9]'), '');
     return double.tryParse(clean) ?? 0.0;
   }
@@ -64,6 +64,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
         elevation: 0,
         foregroundColor: const Color(0xFF0F172A),
         actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+            ),
+            icon: const Icon(Icons.compare_arrows_rounded),
+            tooltip: 'Comparer',
+          ),
           Consumer<Cart>(
             builder: (context, cart, _) => Stack(
               alignment: Alignment.center,
@@ -78,10 +86,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     top: 8,
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(color: Color(0xFF6366F1), shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                          color: Color(0xFF6366F1), shape: BoxShape.circle),
                       child: Text(
                         cart.itemCount.toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -96,10 +108,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
           _buildCategoryFilter(),
           Expanded(
             child: _filteredProducts.isEmpty
-                ? const Center(child: Text('Aucun produit trouvé'))
+                ? const Center(child: Text('Aucun produit trouve'))
                 : GridView.builder(
                     padding: const EdgeInsets.all(24),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -118,26 +131,33 @@ class _CatalogScreenState extends State<CatalogScreen> {
         ],
       ),
       bottomNavigationBar: Consumer<Cart>(
-        builder: (context, cart, _) => cart.itemCount > 0 
-          ? SafeArea(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
-                ),
-                child: ElevatedButton(
-                  onPressed: () => _navigateToPayment(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 54),
+        builder: (context, cart, _) => cart.itemCount > 0
+            ? SafeArea(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -5))
+                    ],
                   ),
-                  child: Text('PAYER (${cart.totalAmount.toStringAsFixed(0)} F)', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  child: ElevatedButton(
+                    onPressed: () => _navigateToPayment(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 54),
+                    ),
+                    child: Text(
+                        'PAYER (${cart.totalAmount.toStringAsFixed(0)} F)',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  ),
                 ),
-              ),
-            )
-          : const SizedBox.shrink(),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }
@@ -148,9 +168,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
     if (!session.isLoggedIn) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez vous connecter pour payer')),
+        const SnackBar(
+            content: Text('Veuillez vous connecter pour payer')),
       );
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const LoginPage()));
       return;
     }
 
@@ -186,12 +208,19 @@ class _CatalogScreenState extends State<CatalogScreen> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
             child: ChoiceChip(
-              label: Text(cat, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : const Color(0xFF0F172A))),
+              label: Text(cat,
+                  style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF0F172A))),
               selected: isSelected,
               onSelected: (val) => setState(() => _activeCategory = cat),
               selectedColor: const Color(0xFF0F172A),
               backgroundColor: const Color(0xFFF1F5F9),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
               showCheckmark: false,
             ),
           );
@@ -220,14 +249,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
                   child: Image.asset(
                     product.image,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.grey[200],
-                      child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                      child: const Icon(Icons.image_not_supported_outlined,
+                          color: Colors.grey),
                     ),
                   ),
                 ),
@@ -236,14 +267,18 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFF6366F1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '-${product.discountPercent}%',
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -261,14 +296,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${product.name} ajouté au panier'),
+                          content: Text('${product.name} ajoute au panier'),
                           duration: const Duration(seconds: 1),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     },
                     backgroundColor: const Color(0xFF0F172A),
-                    child: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white, size: 18),
+                    child: const Icon(Icons.add_shopping_cart_rounded,
+                        color: Colors.white, size: 18),
                   ),
                 ),
               ],
@@ -281,13 +317,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
               children: [
                 Text(
                   product.name,
-                  style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                      fontSize: 14, fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   product.desc,
-                  style: GoogleFonts.inter(fontSize: 10, color: Colors.grey[500]),
+                  style:
+                      GoogleFonts.inter(fontSize: 10, color: Colors.grey[500]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -297,14 +335,19 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   children: [
                     Text(
                       product.price,
-                      style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF6366F1)),
+                      style: GoogleFonts.outfit(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF6366F1)),
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded, size: 14, color: Color(0xFFFFB800)),
+                        const Icon(Icons.star_rounded,
+                            size: 14, color: Color(0xFFFFB800)),
                         Text(
                           product.rating.toString(),
-                          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.inter(
+                              fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -317,15 +360,22 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => VirtualTryOnScreen(initialTryOnAsset: product.tryOnAsset)),
+                        MaterialPageRoute(
+                            builder: (_) => VirtualTryOnScreen(
+                                initialTryOnAsset: product.tryOnAsset)),
                       );
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       side: const BorderSide(color: Color(0xFFF1F5F9)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text('ESSAYER 3D', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                    child: Text('ESSAYER 3D',
+                        style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0F172A))),
                   ),
                 ),
               ],

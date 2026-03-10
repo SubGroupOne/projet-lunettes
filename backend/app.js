@@ -8,6 +8,7 @@ const frameRoutes = require('./routes/frame.routes');
 const orderRoutes = require('./routes/order.routes');
 const adminRoutes = require('./routes/admin.routes');
 const insuranceRoutes = require('./routes/insurance.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/frames', frameRoutes);
 app.use('/orders', orderRoutes);
 app.use('/admin', adminRoutes);
 app.use('/insurances', insuranceRoutes);
+app.use('/notifications', notificationRoutes);
 
 // Gestion d'erreurs globale
 app.use((err, req, res, next) => {

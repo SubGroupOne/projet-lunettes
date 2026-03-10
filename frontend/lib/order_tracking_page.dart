@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class OrderTrackingPage extends StatefulWidget {
   final String accessToken;
@@ -34,21 +36,95 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         _error = null;
       });
 
-      // Simuler appel API - Remplacer par vraie API
-      await Future.delayed(const Duration(seconds: 1));
-      
-      setState(() {
-        _orders = _getMockOrders();
-        if (widget.orderId != null) {
-          _selectedOrder = _orders.firstWhere(
-            (order) => order['id'] == widget.orderId,
-            orElse: () => _orders.isNotEmpty ? _orders[0] : null,
-          );
-        } else if (_orders.isNotEmpty) {
-          _selectedOrder = _orders[0];
-        }
-        _isLoading = false;
-      });
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/orders/my-orders'),
+        headers: {'Authorization': 'Bearer ${widget.accessToken}'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> orders = json.decode(response.body);
+        setState(() {
+          _orders = orders.map((order) {
+            // Construire l'historique de suivi selon le statut
+            List<Map<String, dynamic>> history = [];
+            final createdAt = order['created_at'] ?? DateTime.now().toIso8601String();
+            final updatedAt = order['updated_at'] ?? createdAt;
+
+            history.add({
+              'status': 'pending',
+              'message': 'Commande recue',
+              'date': createdAt,
+            });
+
+            final status = order['status'] ?? 'pending';
+            if (['validated', 'shipped', 'delivered'].contains(status)) {
+              history.add({
+                'status': 'confirmed',
+                'message': 'Commande confirmee par l\'opticien',
+                'date': updatedAt,
+              });
+            }
+            if (['shipped', 'delivered'].contains(status)) {
+              history.add({
+                'status': 'processing',
+                'message': 'Lunettes en cours de preparation',
+                'date': updatedAt,
+              });
+              history.add({
+                'status': 'shipped',
+                'message': 'Commande expediee',
+                'date': updatedAt,
+              });
+            }
+            if (status == 'delivered') {
+              history.add({
+                'status': 'delivered',
+                'message': 'Livree avec succes',
+                'date': updatedAt,
+              });
+            }
+            if (status == 'rejected') {
+              history.add({
+                'status': 'rejected',
+                'message': 'Commande rejetee par l\'opticien',
+                'date': updatedAt,
+              });
+            }
+            if (status == 'validated') {
+              history.add({
+                'status': 'processing',
+                'message': 'Lunettes en cours de preparation',
+                'date': updatedAt,
+              });
+            }
+
+            return {
+              'id': order['id'],
+              'frame_name': order['frame_name'] ?? 'Monture inconnue',
+              'total_price': double.tryParse(order['total_price']?.toString() ?? '0') ?? 0.0,
+              'status': status,
+              'created_at': createdAt,
+              'updated_at': updatedAt,
+              'tracking_history': history,
+            };
+          }).toList();
+
+          if (widget.orderId != null) {
+            _selectedOrder = _orders.firstWhere(
+              (order) => order['id'] == widget.orderId,
+              orElse: () => _orders.isNotEmpty ? _orders[0] : null,
+            );
+          } else if (_orders.isNotEmpty) {
+            _selectedOrder = _orders[0];
+          }
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = 'Erreur serveur (${response.statusCode})';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();

@@ -2,10 +2,11 @@ const db = require('../config/db');
 
 exports.getAllOrders = async () => {
   const sql = `
-    SELECT o.*, u.name as user_name, u.email as user_email, f.name as frame_name 
+    SELECT o.*, u.name as user_name, u.email as user_email, 
+           COALESCE(f.name, o.frame_name) as frame_name 
     FROM orders o
     JOIN users u ON o.user_id = u.id
-    JOIN frames f ON o.frame_id = f.id
+    LEFT JOIN frames f ON o.frame_id = f.id
     ORDER BY o.created_at DESC
   `;
   const [rows] = await db.execute(sql);
@@ -14,10 +15,11 @@ exports.getAllOrders = async () => {
 
 exports.getOrderById = async (id) => {
   const sql = `
-    SELECT o.*, u.name as client_name, u.email as client_email, f.name as frame_name 
+    SELECT o.*, u.name as client_name, u.email as client_email, 
+           COALESCE(f.name, o.frame_name) as frame_name 
     FROM orders o
     JOIN users u ON o.user_id = u.id
-    JOIN frames f ON o.frame_id = f.id
+    LEFT JOIN frames f ON o.frame_id = f.id
     WHERE o.id = ?
   `;
   const [rows] = await db.execute(sql, [id]);

@@ -26,7 +26,7 @@ class _FaceAnalysisPageState extends State<FaceAnalysisPage>
   late TabController _tabController;
 
   // ── Config ──────────────────────────────
-  static const String _apiBase = 'http://localhost:5001';
+  static const String _apiBase = 'http://192.168.100.9:5001';
   static const _primary = Color(0xFF6366F1);
   static const _dark = Color(0xFF0F172A);
   static const _bg = Color(0xFFF8FAFC);
